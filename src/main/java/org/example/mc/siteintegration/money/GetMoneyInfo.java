@@ -1,8 +1,8 @@
 package org.example.mc.siteintegration.money;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bukkit.Bukkit;
@@ -31,8 +31,10 @@ public class GetMoneyInfo implements CommandExecutor {
             this.player = (Player) sender;
             this.messageUtil = new PlayerMessageUtil(player);
 
-            fetchGetMoneyCount();
-
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                fetchGetMoneyCount(httpClient);
+            }
+            
         } catch (PlayerError e){
             messageUtil.toActionBar(e.getMessage());
             return false;
@@ -45,12 +47,11 @@ public class GetMoneyInfo implements CommandExecutor {
         return true;
     }
 
-    private void fetchGetMoneyCount() throws Exception {
+    private void fetchGetMoneyCount(CloseableHttpClient httpClient) throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-        HttpClient httpClient = HttpClients.createDefault();
-        String url = "http://localhost:8080/mc/user_inventory/money/" + player.getName();
-        HttpGet request = new HttpGet(url);
+            String url = "http://localhost:8080/mc/user_inventory/money/" + player.getName();
+            HttpGet request = new HttpGet(url);
 
             HttpResponse response = httpClient.execute(request);
 
@@ -87,9 +88,3 @@ public class GetMoneyInfo implements CommandExecutor {
         }
     }
 }
-
-
-
-
-
-

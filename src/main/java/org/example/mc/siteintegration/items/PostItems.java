@@ -5,6 +5,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.bukkit.Bukkit;
 import org.bukkit.block.ShulkerBox;
@@ -50,7 +51,10 @@ public class PostItems implements CommandExecutor {
 
             inspectShulkerInHand();
             inspectShulker();
-            fetchPostItems();
+            
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                fetchPostItems(httpClient);
+            }
 
             shulkerBoxInMainHand.setItemMeta(shulkerMeta);
         } catch (PlayerError e){
@@ -65,10 +69,9 @@ public class PostItems implements CommandExecutor {
         return true;
     }
 
-    private void fetchPostItems () throws Exception {
+    private void fetchPostItems (CloseableHttpClient httpClient) throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-        HttpClient httpClient = HttpClients.createDefault();
         String url = "http://localhost:8080/mc/user_inventory/items";
         HttpPost request = new HttpPost(url);
 
@@ -149,7 +152,7 @@ public class PostItems implements CommandExecutor {
                             }
                         }
 
-                        itemObject.put("enchants", result);
+                        if (!result.isEmpty()) itemObject.put("enchants", result);
                     }
 
                     if (itemMeta instanceof EnchantmentStorageMeta) {
@@ -165,7 +168,7 @@ public class PostItems implements CommandExecutor {
                             }
                         }
 
-                        itemObject.put("stored_enchants", result);
+                        if (!result.isEmpty()) itemObject.put("enchants", result);
                     }
 
                     itemSlot.setAmount(0);

@@ -19,6 +19,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 public class SiteIntegration extends JavaPlugin {
@@ -42,7 +43,7 @@ public class SiteIntegration extends JavaPlugin {
             public void run() {
                 processUserCache();
             }
-        }.runTaskTimerAsynchronously(this, 0, 24000); // Запускать раз в минуту
+        }.runTaskTimerAsynchronously(this, 0, 100); // Запускать раз в минуту
     }
 
     private void processUserCache() {
@@ -89,8 +90,9 @@ public class SiteIntegration extends JavaPlugin {
     }
 
     private void fetchPutAdvancements(String realname, Object advancements) {
+    CompletableFuture.runAsync(() -> {
         HttpClient httpClient = HttpClients.createDefault();
-        String url = "http://localhost:8080/user/advancements";
+        String url = "http://localhost:8080/mc/user/advancements";
         HttpPut request = new HttpPut(url);
 
         try {
@@ -108,5 +110,7 @@ public class SiteIntegration extends JavaPlugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    });
+}
+
 }

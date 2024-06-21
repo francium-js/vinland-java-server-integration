@@ -1,9 +1,9 @@
 package org.example.mc.siteintegration.items;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bukkit.Bukkit;
@@ -44,8 +44,10 @@ public class PullItems implements CommandExecutor {
 
             inspectShulkerInHand();
             inspectShulkerContents();
-            fetchGetItemTicketInfo();
-            fetchPullItems();
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                fetchGetItemTicketInfo(httpClient);
+                fetchPullItems(httpClient);
+            }
 
             shulkerBoxInMainHand.setItemMeta(shulkerMeta);
         } catch (PlayerError e){
@@ -60,10 +62,9 @@ public class PullItems implements CommandExecutor {
         return true;
     }
 
-    private void fetchGetItemTicketInfo() throws Exception{
+    private void fetchGetItemTicketInfo(CloseableHttpClient httpClient) throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        HttpClient httpClient = HttpClients.createDefault();
         String url = "http://localhost:8080/mc/item_ticket/countSlots?realname="+ player.getName() + "&itemTicketId=" + itemTicketId;
         HttpGet request = new HttpGet(url);
 
@@ -115,10 +116,9 @@ public class PullItems implements CommandExecutor {
         shulkerMeta.setBlockState(shulkerBox);
     }
 
-    private void fetchPullItems() throws Exception  {
+    private void fetchPullItems(CloseableHttpClient httpClient) throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        HttpClient httpClient = HttpClients.createDefault();
         String url = "http://localhost:8080/mc/user_inventory/items/" + itemTicketId;
         HttpPut request = new HttpPut(url);
 

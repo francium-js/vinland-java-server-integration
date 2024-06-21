@@ -2,9 +2,9 @@ package org.example.mc.siteintegration.money;
 
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.bukkit.Bukkit;
 import org.bukkit.block.ShulkerBox;
@@ -42,7 +42,10 @@ public class PostMoney implements CommandExecutor {
 
             inspectShulkerInHande();
             inspectShulker();
-            fetchPostMoney();
+
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                fetchPostMoney(httpClient);
+            }
 
             shulkerWithDiamonOre.setItemMeta(shulkerMeta);
         } catch (PlayerError e){
@@ -58,10 +61,9 @@ public class PostMoney implements CommandExecutor {
     }
 
 
-    private void fetchPostMoney() throws Exception{
+    private void fetchPostMoney(CloseableHttpClient httpClient) throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        HttpClient httpClient = HttpClients.createDefault();
         String url = "http://localhost:8080/mc/user_inventory/money";
         HttpPost request = new HttpPost(url);
 

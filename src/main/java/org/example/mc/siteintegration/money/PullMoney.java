@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bukkit.Bukkit;
@@ -47,9 +47,11 @@ public class PullMoney implements CommandExecutor {
             this.shulkerWithDiamonOre = player.getInventory().getItemInMainHand();
 
             inspectShulkerInHand();
-            fetchGetMoneyCount();
-            inspectShulkerContents();
-            fetchPutMoney();
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                fetchGetMoneyCount(httpClient);
+                inspectShulkerContents();
+                fetchPutMoney(httpClient);
+            }
 
             shulkerWithDiamonOre.setItemMeta(shulkerMeta);
         } catch (PlayerError e){
@@ -132,10 +134,9 @@ public class PullMoney implements CommandExecutor {
         shulkerMeta.setBlockState(shulkerBox);
     }
 
-    private void fetchPutMoney() throws Exception{
+    private void fetchPutMoney(CloseableHttpClient httpClient) throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        HttpClient httpClient = HttpClients.createDefault();
         String url = "http://localhost:8080/mc/user_inventory/money";
         HttpPut request = new HttpPut(url);
 
@@ -182,8 +183,7 @@ public class PullMoney implements CommandExecutor {
             player.sendMessage("");
     }
 
-    private void fetchGetMoneyCount() throws Exception {
-        HttpClient httpClient = HttpClients.createDefault();
+    private void fetchGetMoneyCount(CloseableHttpClient httpClient) throws Exception {
         String url = "http://localhost:8080/mc/user_inventory/money/" + player.getName();
         HttpGet request = new HttpGet(url);
 
@@ -211,4 +211,3 @@ public class PullMoney implements CommandExecutor {
         messageUtil.toActionBar("&aУспішна операція !");
     }
 }
-
