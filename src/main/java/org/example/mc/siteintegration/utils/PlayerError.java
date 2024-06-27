@@ -23,6 +23,6 @@ public class PlayerError extends Error {
 
     @Override
     public String getMessage() {
-        return errorMessage;
+        return this.errorMessage;
     }
 }

@@ -2,7 +2,6 @@ D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\items
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\commands\TradeCommandExecutor.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\money\PostMoney.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\money\PullMoney.java
-D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\listener\PlayerJoinListener.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\commands\TradeTabCompleter.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\money\GetMoneyInfo.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\utils\PlayerMessageUtil.java

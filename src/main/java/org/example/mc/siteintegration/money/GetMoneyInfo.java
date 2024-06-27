@@ -1,5 +1,7 @@
 package org.example.mc.siteintegration.money;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -31,9 +33,8 @@ public class GetMoneyInfo implements CommandExecutor {
             this.player = (Player) sender;
             this.messageUtil = new PlayerMessageUtil(player);
 
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                fetchGetMoneyCount(httpClient);
-            }
+          
+            fetchGetMoneyCount();
             
         } catch (PlayerError e){
             messageUtil.toActionBar(e.getMessage());
@@ -47,27 +48,31 @@ public class GetMoneyInfo implements CommandExecutor {
         return true;
     }
 
-    private void fetchGetMoneyCount(CloseableHttpClient httpClient) throws Exception {
+    private void fetchGetMoneyCount() throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-            String url = "http://localhost:8080/mc/user_inventory/money/" + player.getName();
+            String url = "http://localhost:8080/mc/user/money/" + player.getName();
             HttpGet request = new HttpGet(url);
+
+            CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
 
             HttpResponse response = httpClient.execute(request);
 
             int statusCode = response.getStatusLine().getStatusCode();
 
-            switch (statusCode) {
-                case 200: break;
-                case 404: throw new PlayerError("&cГравця з таким ніком не знайдено");
-                case 500: throw new PlayerError("&cВнутрішня помилка сервера");
-                default: throw new PlayerError("&cОперація не успішна :(");
-            }
-
             String responseBody = EntityUtils.toString(response.getEntity());
-
             JSONParser parser = new JSONParser();
             JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
+
+            if(statusCode >= 300 && statusCode < 600) {
+                
+
+                String errorMessage = jsonResponse.get("message").toString();
+
+                throw new PlayerError(errorMessage);
+            }
+
             int moneyCount = Integer.parseInt(jsonResponse.get("money").toString());
 
             messageUtil.toActionBar("&aУспішна операція !");
@@ -75,6 +80,11 @@ public class GetMoneyInfo implements CommandExecutor {
             player.sendMessage("");
             messageUtil.toChat(moneyCalculator(moneyCount));
             player.sendMessage("");
+
+        } catch(Exception e){
+            throw new Error(e);
+        }
+    });
     }
 
     private String moneyCalculator(int count) {

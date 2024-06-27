@@ -1,8 +1,9 @@
 package org.example.mc.siteintegration.money;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+
+import java.util.concurrent.CompletableFuture;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
@@ -47,13 +48,7 @@ public class PullMoney implements CommandExecutor {
             this.shulkerWithDiamonOre = player.getInventory().getItemInMainHand();
 
             inspectShulkerInHand();
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                fetchGetMoneyCount(httpClient);
-                inspectShulkerContents();
-                fetchPutMoney(httpClient);
-            }
-
-            shulkerWithDiamonOre.setItemMeta(shulkerMeta);
+            fetchGetMoneyCount();
         } catch (PlayerError e){
             messageUtil.toActionBar(e.getMessage());
             return false;
@@ -67,19 +62,50 @@ public class PullMoney implements CommandExecutor {
     }
 
     private void inspectShulkerInHand() throws Exception{
-        shulkerMeta = (BlockStateMeta) shulkerWithDiamonOre.getItemMeta();
+        this.shulkerMeta = (BlockStateMeta) this.shulkerWithDiamonOre.getItemMeta();
 
-        if (shulkerMeta == null || !(shulkerMeta.getBlockState() instanceof ShulkerBox)) {
+        if (this.shulkerMeta == null || !(this.shulkerMeta.getBlockState() instanceof ShulkerBox)) {
             throw new PlayerError("&cВ руках повинен бути ваш гаманець");
         }
 
-        String shulkerboxName = shulkerMeta.getDisplayName();
+        String shulkerboxName = this.shulkerMeta.getDisplayName();
         String skulherboxInHand = "Гаманець " + player.getName();
         boolean isIdentical = shulkerboxName.equals(skulherboxInHand);
 
         if (!isIdentical) throw new PlayerError("&cВ руках повинен бути ваш гаманець");
     }
 
+    private void fetchGetMoneyCount() throws Exception {
+        String url = "http://localhost:8080/mc/user/money/" + player.getName();
+        HttpGet request = new HttpGet(url);
+
+        CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
+                HttpResponse response = httpClient.execute(request);
+
+                int statusCode = response.getStatusLine().getStatusCode();
+                int moneyInAuctionInventory = 0;
+
+                String responseBody = EntityUtils.toString(response.getEntity());
+
+                JSONParser parser = new JSONParser();
+                JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
+
+                if(statusCode >= 300 && statusCode < 600) {
+                    String errorMessage = jsonResponse.get("message").toString();
+    
+                    throw new PlayerError(errorMessage);
+                }
+
+                moneyInAuctionInventory = Integer.parseInt(jsonResponse.get("money").toString());
+
+                if(moneyInAuctionInventory < howMuchWantMoney) throw new PlayerError("&cУ вас немає такої кількості валюти");
+
+                inspectShulkerContents();
+            } catch(Exception e){
+                throw new Error(e);
+            }});
+    }
 
     private void inspectShulkerContents() throws Exception{
         ShulkerBox shulkerBox = (ShulkerBox) shulkerMeta.getBlockState();
@@ -131,17 +157,20 @@ public class PullMoney implements CommandExecutor {
         if (howMuchPlaceMoney == 0) throw new PlayerError("&cВ гаманці немає місця");
 
         shulkerBox.getInventory().setContents(contentsArray);
-        shulkerMeta.setBlockState(shulkerBox);
+        this.shulkerMeta.setBlockState(shulkerBox);
+
+        fetchPutMoney();
     }
 
-    private void fetchPutMoney(CloseableHttpClient httpClient) throws Exception{
+    private void fetchPutMoney() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/user_inventory/money";
+        String url = "http://localhost:8080/mc/user/money";
         HttpPut request = new HttpPut(url);
 
         JSONObject payload = new JSONObject();
-        payload.put("realname", player.getName());
+        
+        payload.put("username", player.getName());
         payload.put("money", howMuchWantMoney);
 
         Gson gson = new Gson();
@@ -150,64 +179,42 @@ public class PullMoney implements CommandExecutor {
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(jsonPayload, "UTF-8"));
 
-            HttpResponse response = httpClient.execute(request);
+        CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
+                HttpResponse response = httpClient.execute(request);
 
-            int statusCode = response.getStatusLine().getStatusCode();
+                int statusCode = response.getStatusLine().getStatusCode();
 
-            switch (statusCode) {
-                case 201: break;
-                case 402: throw new PlayerError("&cУ вас недостатньо валюти");
-                case 404: throw new PlayerError("&cГравець не знайдений");
-                case 500: throw new PlayerError("&cВнутрішня помилка сервера");
-                default: throw new PlayerError("&cОперація не успішна :(");
+                String responseBody = EntityUtils.toString(response.getEntity());
+
+                JSONParser parser = new JSONParser();
+                JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
+
+                if(statusCode >= 300 && statusCode < 600) {
+                    String errorMessage = jsonResponse.get("message").toString();
+
+                    throw new PlayerError(errorMessage);
+                }
+    
+                int moneyBefore = Integer.parseInt(jsonResponse.get("moneyBefore").toString());
+                int moneyAfter = Integer.parseInt(jsonResponse.get("moneyAfter").toString());
+    
+                String countLittleMoneyInString = "&b" + howMuchWantMoney + "шт. ⟡";
+                String moneyCountInStack = "&b" + howMuchWantMoney / 64 + "ст. ⟡";
+    
+                String countMoneyInString = howMuchWantMoney % 64 == 0 ? moneyCountInStack : howMuchWantMoney < 64 ? countLittleMoneyInString : "&b" + (howMuchWantMoney - howMuchWantMoney % 64) / 64 + "ст. i " + howMuchWantMoney % 64 + "шт. ⟡";
+    
+                this.messageUtil.toActionBar("&aУспішна операція !");
+    
+                this.player.sendMessage("");
+                this.messageUtil.toChat("&7Ви зняли &b" + countMoneyInString);
+                this.messageUtil.toChat("&b" + moneyBefore + "⟡ &7---> " + "&b" + moneyAfter + "⟡");
+                this.player.sendMessage("");
+
+                this.shulkerWithDiamonOre.setItemMeta(this.shulkerMeta);
+            } catch(Exception e){
+                throw new Error(e);
             }
-
-            String responseBody = EntityUtils.toString(response.getEntity());
-
-            JsonParser parser = new JsonParser();
-            JsonObject jsonResponse = parser.parse(responseBody).getAsJsonObject();
-
-            int moneyBefore = jsonResponse.get("moneyBefore").getAsInt();
-            int moneyAfter = jsonResponse.get("moneyAfter").getAsInt();
-
-            String countLittleMoneyInString = "&b" + howMuchWantMoney + "шт. ⟡";
-            String moneyCountInStack = "&b" + howMuchWantMoney / 64 + "ст. ⟡";
-
-            String countMoneyInString = howMuchWantMoney % 64 == 0 ? moneyCountInStack : howMuchWantMoney < 64 ? countLittleMoneyInString : "&b" + (howMuchWantMoney - howMuchWantMoney % 64) / 64 + "ст. i " + howMuchWantMoney % 64 + "шт. ⟡";
-
-            messageUtil.toActionBar("&aУспішна операція !");
-
-            player.sendMessage("");
-            messageUtil.toChat("&7Ви зняли &b" + countMoneyInString);
-            messageUtil.toChat("&b" + moneyBefore + "⟡ &7---> " + "&b" + moneyAfter + "⟡");
-            player.sendMessage("");
-    }
-
-    private void fetchGetMoneyCount(CloseableHttpClient httpClient) throws Exception {
-        String url = "http://localhost:8080/mc/user_inventory/money/" + player.getName();
-        HttpGet request = new HttpGet(url);
-
-            HttpResponse response = httpClient.execute(request);
-
-            int statusCode = response.getStatusLine().getStatusCode();
-            int moneyInAuctionInventory = 0;
-
-            switch (statusCode) {
-                case 200: break;
-                case 404: throw new PlayerError("&cГравець не знайдений");
-                case 500: throw new PlayerError("&cВнутрішня помилка сервера");
-                default: throw new PlayerError("&cОперація не успішна :(");
-            }
-
-            String responseBody = EntityUtils.toString(response.getEntity());
-
-            JSONParser parser = new JSONParser();
-            JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
-
-            moneyInAuctionInventory = Integer.parseInt(jsonResponse.get("money").toString());
-
-            if(moneyInAuctionInventory < howMuchWantMoney) throw new PlayerError("&cУ вас немає такої кількості валюти");
-
-        messageUtil.toActionBar("&aУспішна операція !");
+        });
     }
 }

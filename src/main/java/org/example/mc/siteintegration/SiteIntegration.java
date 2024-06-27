@@ -10,7 +10,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.example.mc.siteintegration.commands.TradeCommandExecutor;
 import org.example.mc.siteintegration.commands.TradeTabCompleter;
-import org.example.mc.siteintegration.listener.PlayerJoinListener;
 import org.json.simple.JSONObject;
 
 import java.io.FileReader;
@@ -31,9 +30,6 @@ public class SiteIntegration extends JavaPlugin {
         logger = getLogger();
         getLogger().info("ShulkerInspectPlugin has been enabled!");
 
-        PlayerJoinListener playerJoinListener = new PlayerJoinListener();
-        getServer().getPluginManager().registerEvents(playerJoinListener, this);
-
         TradeCommandExecutor tradeExecutor = new TradeCommandExecutor();
         getCommand("trade").setExecutor(tradeExecutor);
         getCommand("trade").setTabCompleter(new TradeTabCompleter());
@@ -43,7 +39,7 @@ public class SiteIntegration extends JavaPlugin {
             public void run() {
                 processUserCache();
             }
-        }.runTaskTimerAsynchronously(this, 0, 100); // Запускать раз в минуту
+        }.runTaskAsynchronously(this);
     }
 
     private void processUserCache() {
@@ -89,7 +85,7 @@ public class SiteIntegration extends JavaPlugin {
         String expiresOn;
     }
 
-    private void fetchPutAdvancements(String realname, Object advancements) {
+    private void fetchPutAdvancements(String username, Object advancements) {
     CompletableFuture.runAsync(() -> {
         HttpClient httpClient = HttpClients.createDefault();
         String url = "http://localhost:8080/mc/user/advancements";
@@ -97,7 +93,7 @@ public class SiteIntegration extends JavaPlugin {
 
         try {
             JSONObject payload = new JSONObject();
-            payload.put("realname", realname);
+            payload.put("username", username);
             payload.put("data", advancements);
 
             Gson gson = new Gson();

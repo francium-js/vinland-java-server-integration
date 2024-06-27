@@ -1,5 +1,7 @@
 package org.example.mc.siteintegration.items;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
@@ -44,12 +46,7 @@ public class PullItems implements CommandExecutor {
 
             inspectShulkerInHand();
             inspectShulkerContents();
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                fetchGetItemTicketInfo(httpClient);
-                fetchPullItems(httpClient);
-            }
-
-            shulkerBoxInMainHand.setItemMeta(shulkerMeta);
+            fetchGetItemTicketInfo();
         } catch (PlayerError e){
             messageUtil.toActionBar(e.getMessage());
             return false;
@@ -62,33 +59,39 @@ public class PullItems implements CommandExecutor {
         return true;
     }
 
-    private void fetchGetItemTicketInfo(CloseableHttpClient httpClient) throws Exception{
+    private void fetchGetItemTicketInfo() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/item_ticket/countSlots?realname="+ player.getName() + "&itemTicketId=" + itemTicketId;
+        String url = "http://localhost:8080/mc/item_ticket/countSlots?username="+ player.getName() + "&itemTicketId=" + itemTicketId;
         HttpGet request = new HttpGet(url);
 
-        Integer needCountSlots;
+        CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
 
             HttpResponse response = httpClient.execute(request);
 
             int statusCode = response.getStatusLine().getStatusCode();
 
-            switch (statusCode) {
-                case 200: break;
-                case 404: throw new PlayerError("&cКвиток з таким id не існує");
-                case 500: throw new PlayerError("&cВнутрішня помилка сервера");
-                default: throw new PlayerError("&cОперація не успішна :(");
-            }
-
             String responseBody = EntityUtils.toString(response.getEntity());
-
             JSONParser parser = new JSONParser();
             JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
 
-            needCountSlots = Integer.parseInt(jsonResponse.get("countSlots").toString());
+            if(statusCode >= 300 && statusCode < 600) {
+
+                String errorMessage = jsonResponse.get("message").toString();
+
+                throw new PlayerError(errorMessage);
+            }
+
+            Integer needCountSlots = Integer.parseInt(jsonResponse.get("countSlots").toString());
 
             if(countEmptySlots < needCountSlots) throw new PlayerError("&cВ шалкері не вистачає місця");
+
+            fetchPullItems();
+        } catch(Exception e){
+            throw new Error(e);
+        }
+    });
     }
 
     private void containNewItemToShulker(JSONArray serializedArray) throws Exception{
@@ -116,31 +119,40 @@ public class PullItems implements CommandExecutor {
         shulkerMeta.setBlockState(shulkerBox);
     }
 
-    private void fetchPullItems(CloseableHttpClient httpClient) throws Exception  {
+    private void fetchPullItems() throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/user_inventory/items/" + itemTicketId;
+        String url = "http://localhost:8080/mc/user/items/" + itemTicketId;
         HttpPut request = new HttpPut(url);
+
+        CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
 
             HttpResponse response = httpClient.execute(request);
 
             int statusCode = response.getStatusLine().getStatusCode();
 
-            switch (statusCode) {
-                case 201: break;
-                case 404: throw new PlayerError("&cГравець не знайдений");
-                case 500: throw new PlayerError("&cВнутрішня помилка сервера");
-                default: throw new PlayerError("&cОперація не успішна :(");
-            }
-
             String responseBody = EntityUtils.toString(response.getEntity());
+
             JSONParser parser = new JSONParser();
             JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
+
+            if(statusCode >= 300 && statusCode < 600) {
+                String errorMessage = jsonResponse.get("message").toString();
+
+                throw new PlayerError(errorMessage);
+            }
 
             JSONArray serializedArray = (JSONArray) jsonResponse.get("data");
             containNewItemToShulker(serializedArray);
 
             messageUtil.toActionBar("&aВи успішно забрали предмети");
+
+            shulkerBoxInMainHand.setItemMeta(shulkerMeta);
+        } catch(Exception e){
+            throw new Error(e);
+        }
+    });
     }
 
     private void inspectShulkerContents() {

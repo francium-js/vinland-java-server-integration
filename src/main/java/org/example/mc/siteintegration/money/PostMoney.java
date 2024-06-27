@@ -1,11 +1,15 @@
 package org.example.mc.siteintegration.money;
 
 import com.google.gson.Gson;
+
+import java.util.concurrent.CompletableFuture;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.Command;
@@ -18,6 +22,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class PostMoney implements CommandExecutor {
 
@@ -43,11 +48,7 @@ public class PostMoney implements CommandExecutor {
             inspectShulkerInHande();
             inspectShulker();
 
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                fetchPostMoney(httpClient);
-            }
-
-            shulkerWithDiamonOre.setItemMeta(shulkerMeta);
+            fetchPostMoney();
         } catch (PlayerError e){
             messageUtil.toActionBar(e.getMessage());
             return false;
@@ -61,14 +62,14 @@ public class PostMoney implements CommandExecutor {
     }
 
 
-    private void fetchPostMoney(CloseableHttpClient httpClient) throws Exception{
+    private void fetchPostMoney() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/user_inventory/money";
+        String url = "http://localhost:8080/mc/user/money";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
-        payload.put("realname", player.getName());
+        payload.put("username", player.getName());
         payload.put("money", howMuchPlayerWant);
 
         Gson gson = new Gson();
@@ -77,15 +78,21 @@ public class PostMoney implements CommandExecutor {
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(jsonPayload, "UTF-8"));
 
+        CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
+
             HttpResponse response = httpClient.execute(request);
 
             int statusCode = response.getStatusLine().getStatusCode();
 
-            switch (statusCode) {
-                case 201: break;
-                case 404: throw new PlayerError("&cГравця з таким ніком не знайдено");
-                case 500: throw new PlayerError("&cВнутрішня помилка сервера");
-                default: throw new PlayerError("&cОперація не успішна :(");
+            String responseBody = EntityUtils.toString(response.getEntity());
+            JSONParser parser = new JSONParser();
+            JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
+
+            if(statusCode >= 300 && statusCode < 600) {
+                String errorMessage = jsonResponse.get("message").toString();
+
+                throw new PlayerError(errorMessage);
             }
 
             String countLittleMoneyInString = "&b" + howMuchPlayerWant + " шт. ⟡";
@@ -97,6 +104,12 @@ public class PostMoney implements CommandExecutor {
             player.sendMessage("");
             messageUtil.toChat("Ви перекинули " + countMoneyInString);
             player.sendMessage("");
+
+            shulkerWithDiamonOre.setItemMeta(shulkerMeta);
+        } catch(Exception e){
+            throw new Error(e);
+        }
+    });
     }
 
     private void inspectShulkerInHande () throws Exception{
