@@ -6,6 +6,8 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -45,7 +47,11 @@ public class UserManager {
 
     public CompletableFuture<Void> registerUser(String username, String password, UUID uuid, String ip) {
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        Instant mcSession = Instant.now().plusSeconds(30); // 7 дней
+        Instant instant = Instant.now().plusSeconds(10); // 7 дней
+
+        ZoneId kievZone = ZoneId.of("Europe/Kiev");
+        Instant mcSession = instant.atZone(kievZone).toInstant();
+
 
         User user = new User(username, hashedPassword, uuid, ip, mcSession);
         userCache.put(username, user);
@@ -79,12 +85,16 @@ public class UserManager {
 
         return CompletableFuture.runAsync(() -> {
             if (user != null) {
-                user.setMcSession(Instant.now().plusSeconds(7 * 24 * 60 * 60)); // 7 дней
+                Instant instant = Instant.now().plusSeconds(10); // 7 дней
+
+                ZoneId kievZone = ZoneId.of("Europe/Kiev");
+                Instant mcSession = instant.atZone(kievZone).toInstant();
+
                 userCache.put(username, user);
 
                 try {
                     PreparedStatement stmt = conn.prepareStatement("UPDATE users SET mcSession = ?, ip = ? WHERE username = ?");
-                    stmt.setLong(1, user.getMcSession().toEpochMilli());
+                    stmt.setLong(1, mcSession.toEpochMilli());
                     stmt.setString(2, ip);
                     stmt.setString(3, username);
                     stmt.executeUpdate();

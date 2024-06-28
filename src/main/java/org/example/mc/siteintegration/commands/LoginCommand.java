@@ -29,7 +29,6 @@ public class LoginCommand implements CommandExecutor {
         this.messageUtil = new PlayerMessageUtil(player);
 
         if (args.length != 1) {
-            messageUtil.toChat("&cАвторизуйтесь: /login <пароль>");
             return true;
         }
 
@@ -40,6 +39,7 @@ public class LoginCommand implements CommandExecutor {
 
             freePlayer(player);
 
+            messageUtil.clearTitle();
             messageUtil.toChat("&2Успішна авторизація!");
         } else {
             messageUtil.toChat("&cНеправильний пароль!");

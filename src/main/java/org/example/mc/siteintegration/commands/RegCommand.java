@@ -27,7 +27,6 @@ public class RegCommand implements CommandExecutor {
             this.messageUtil = new PlayerMessageUtil(player);
 
             if (args.length != 2) {
-                messageUtil.toChat("&cЗареєструйтесь: /reg <пароль> <повторітьПароль>");
                 return true;
             }
 
@@ -40,7 +39,7 @@ public class RegCommand implements CommandExecutor {
             }
 
             if (userManager.getUser(player.getName()) != null) {
-                messageUtil.toChat("&cТи уже зареєстрований!");
+                messageUtil.toChat("&cВи уже зареєстровані!");
                 return true;
             }
 
@@ -50,6 +49,7 @@ public class RegCommand implements CommandExecutor {
             userManager.registerUser(player.getName(), password, uuid, ip);
 
             freePlayer(player);
+            messageUtil.clearTitle();
             messageUtil.toChat("&2Успішна реєстрація!");
             return true;
         }

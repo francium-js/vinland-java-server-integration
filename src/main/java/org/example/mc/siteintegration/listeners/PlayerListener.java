@@ -1,5 +1,6 @@
 package org.example.mc.siteintegration.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -37,18 +38,21 @@ public class PlayerListener implements Listener {
 
         if (user == null) {
             // Если пользователь не зарегистрирован
-            messageUtil.toChat("&cЗареєструйтесь: /reg <пароль> <повторітьПароль>");
+            messageUtil.sendTitle("&cРеєстрація", "&c/reg <пароль> <повторітьПароль>", 40, 40, 20000);
         } else {
             // Если пользователь зарегистрирован
-            if (user.getIp().equals(playerIp) && Instant.now().isBefore(user.getMcSession())) {
+            if (user.getIp().equals(playerIp) && Instant.now().toEpochMilli() < user.getMcSession().toEpochMilli()) {
                 // Если IP совпадает и сессия еще действительна
+
+                long sessionEpochMillis = user.getMcSession().toEpochMilli();
+                Bukkit.getLogger().info(String.valueOf(sessionEpochMillis));
+
                 messageUtil.toChat("&2Успішне відновлення сессії.");
 
                 freePlayer(player);
             } else {
                 // Если IP не совпадает или сессия истекла
-                restrictPlayer(player);
-                messageUtil.toChat("&Авторизуйтесь: /login <пароль>");
+                messageUtil.sendTitle("&cАвторизація", "&c/login <пароль>", 40, 40, 20000);
             }
         }
     }
@@ -59,7 +63,6 @@ public class PlayerListener implements Listener {
         player.setFlySpeed(0);
         player.setAllowFlight(false);
         player.setInvulnerable(true);
-        player.chat(null);
     }
 
     private void freePlayer(Player player) {

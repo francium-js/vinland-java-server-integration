@@ -21,6 +21,14 @@ public class PlayerMessageUtil {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(giveTextWithColor(text)));
     }
 
+    public void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        player.sendTitle(giveTextWithColor(title), giveTextWithColor(subtitle), fadeIn, stay, fadeOut);
+    }
+
+    public void clearTitle() {
+        player.sendTitle("", "", 0, 0, 0);
+    }
+
     private String giveTextWithColor(String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
     }
