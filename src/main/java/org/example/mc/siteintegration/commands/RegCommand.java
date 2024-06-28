@@ -1,63 +1,66 @@
 package org.example.mc.siteintegration.commands;
 
+import java.util.UUID;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.example.mc.siteintegration.databaseManager.DatabaseManager;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.bukkit.potion.PotionEffectType;
+import org.example.mc.siteintegration.managers.UserManager;
+import org.example.mc.siteintegration.utils.PlayerMessageUtil;
 
 public class RegCommand implements CommandExecutor {
+
+    private final UserManager userManager;
+    private PlayerMessageUtil messageUtil;
+
+    public RegCommand(UserManager userManager) {
+        this.userManager = userManager;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("reg")) {
-            if (sender instanceof Player) {
-                Player player = (Player) sender;
-                if (args.length != 2) {
-                    player.sendMessage("Usage: /reg <password> <repetPassword>");
-                    return true;
-                }
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
 
-                String password = args[0];
-                String repetPassword = args[1];
+            this.messageUtil = new PlayerMessageUtil(player);
 
-                if (!password.equals(repetPassword)) {
-                    player.sendMessage("Passwords do not match!");
-                    return true;
-                }
-
-                try (Connection conn = DatabaseManager.getConnection()) {
-                    // Проверка, существует ли игрок
-                    PreparedStatement checkUserStmt = conn.prepareStatement("SELECT * FROM users WHERE username = ?");
-                    checkUserStmt.setString(1, player.getName());
-                    ResultSet rs = checkUserStmt.executeQuery();
-
-                    if (rs.next()) {
-                        player.sendMessage("Player already registered!");
-                        return true;
-                    }
-
-                    // Регистрация игрока
-                    PreparedStatement insertUserStmt = conn.prepareStatement("INSERT INTO users (username, password, uuid) VALUES (?, ?)");
-                    insertUserStmt.setString(1, player.getName());
-                    insertUserStmt.setString(2, password);  // Note: Store hashed password in production
-                    insertUserStmt.setString(3, player.getUniqueId().toString()); 
-                    insertUserStmt.executeUpdate();
-
-                    player.sendMessage("Player registered successfully!");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    player.sendMessage("An error occurred while registering. Please try again.");
-                }
-            } else {
-                sender.sendMessage("This command can only be run by a player.");
+            if (args.length != 2) {
+                messageUtil.toChat("&cЗареєструйтесь: /reg <пароль> <повторітьПароль>");
+                return true;
             }
+
+            String password = args[0];
+            String repeatPassword = args[1];
+
+            if (!password.equals(repeatPassword)) {
+                messageUtil.toChat("&cПаролі не співпадають!");
+                return true;
+            }
+
+            if (userManager.getUser(player.getName()) != null) {
+                messageUtil.toChat("&cТи уже зареєстрований!");
+                return true;
+            }
+
+            UUID uuid = player.getUniqueId();
+            String ip = player.getAddress().getAddress().getHostAddress();
+
+            userManager.registerUser(player.getName(), password, uuid, ip);
+
+            freePlayer(player);
+            messageUtil.toChat("&2Успішна реєстрація!");
             return true;
         }
+
         return false;
+    }
+    private void freePlayer(Player player) {
+        player.removePotionEffect(PotionEffectType.BLINDNESS); 
+        player.setWalkSpeed(0.2f);
+        player.setFlySpeed(0.2f);
+        player.setAllowFlight(true);
+        player.setInvulnerable(false);
     }
 }

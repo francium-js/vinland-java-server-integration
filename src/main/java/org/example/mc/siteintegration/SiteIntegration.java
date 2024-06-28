@@ -8,10 +8,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.example.mc.siteintegration.commands.LoginCommand;
 import org.example.mc.siteintegration.commands.RegCommand;
 import org.example.mc.siteintegration.commands.TradeCommandExecutor;
 import org.example.mc.siteintegration.commands.TradeTabCompleter;
-import org.example.mc.siteintegration.databaseManager.DatabaseManager;
+import org.example.mc.siteintegration.listeners.PlayerListener;
+import org.example.mc.siteintegration.managers.DatabaseManager;
+import org.example.mc.siteintegration.managers.UserManager;
 import org.json.simple.JSONObject;
 
 import java.io.FileReader;
@@ -19,32 +22,52 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 public class SiteIntegration extends JavaPlugin {
+
     private final Gson gson = new Gson();
     private Logger logger;
+
+    private UserManager userManager;
 
     @Override
     public void onEnable() {
         logger = getLogger();
         getLogger().info("ShulkerInspectPlugin has been enabled!");
 
-        try {
-            DatabaseManager.connect("localhost", 3306, "root", "root", "root");
-            getLogger().info("Connected to the database!");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            getLogger().severe("Could not connect to the database.");
-        }
+        // Initialize database connection and userManager
+        DatabaseManager.initialize().thenRun(() -> {
+            userManager = new UserManager(DatabaseManager.getConnection());
+
+            userManager.loadUsers().thenRun(() -> {
+                // Register events
+                getServer().getPluginManager().registerEvents(new PlayerListener(userManager), this);
+
+                getCommand("reg").setExecutor(new RegCommand(userManager));
+                getCommand("login").setExecutor(new LoginCommand(userManager));
+
+                getLogger().info("SiteIntegration enabled!");
+            }).exceptionally(ex -> {
+                getLogger().severe("Failed to load user data!");
+                ex.printStackTrace();
+                return null;
+            });
+
+        }).exceptionally(ex -> {
+            getLogger().severe("Failed to connect to the database!");
+            ex.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
+            return null;
+        });
 
         TradeCommandExecutor tradeExecutor = new TradeCommandExecutor();
+
+
         getCommand("trade").setExecutor(tradeExecutor);
         getCommand("trade").setTabCompleter(new TradeTabCompleter());
-        getCommand("reg").setExecutor(new RegCommand());
 
         new BukkitRunnable() {
             @Override
@@ -56,7 +79,6 @@ public class SiteIntegration extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        DatabaseManager.close();
         getLogger().info("SiteIntegration has been disabled.");
     }
 

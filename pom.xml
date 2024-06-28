@@ -85,7 +85,12 @@
       <dependency>
         <groupId>mysql</groupId>
         <artifactId>mysql-connector-java</artifactId>
-        <version>8.0.26</version>
-    </dependency>
+        <version>8.0.27</version> <!-- Версия может быть актуализирована -->
+      </dependency>
+      <dependency>
+        <groupId>org.mindrot</groupId>
+        <artifactId>jbcrypt</artifactId>
+        <version>0.4</version>
+      </dependency>
   </dependencies>
 </project>

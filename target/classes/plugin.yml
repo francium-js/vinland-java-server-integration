@@ -1,8 +1,14 @@
 name: SiteIntegration
-version: '1.0-SNAPSHOT'
+version: "1.0-SNAPSHOT"
 main: org.example.mc.siteintegration.SiteIntegration
-api-version: '1.20'
+api-version: "1.20"
 commands:
   trade:
     description: Виконати різні торгові операції
     usage: /<command> <subcommand> [amount]
+  reg:
+    description: Реєстрація на сервері
+    usage: /reg <password> <repetPassword>
+  login:
+    description: Логін на сервері
+    usage: /login <password>
