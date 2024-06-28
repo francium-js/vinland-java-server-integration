@@ -4,7 +4,6 @@ D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\comma
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\managers\DatabaseManager.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\SiteIntegration.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\commands\LoginCommand.java
-D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\auth\SiteIntegrationAuth.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\items\ItemSerializer.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\commands\TradeCommandExecutor.java
 D:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\money\PullMoney.java
