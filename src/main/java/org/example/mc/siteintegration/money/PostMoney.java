@@ -2,6 +2,7 @@ package org.example.mc.siteintegration.money;
 
 import com.google.gson.Gson;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.http.HttpResponse;
@@ -31,6 +32,7 @@ public class PostMoney implements CommandExecutor {
     private ItemStack shulkerWithDiamonOre;
     private BlockStateMeta shulkerMeta;
     private PlayerMessageUtil messageUtil;
+    private String moneyPostStorageId = UUID.randomUUID().toString();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -47,8 +49,6 @@ public class PostMoney implements CommandExecutor {
 
             inspectShulkerInHande();
             inspectShulker();
-
-            shulkerWithDiamonOre.setItemMeta(shulkerMeta);
 
             fetchPostMoney();
         } catch (PlayerError e){
@@ -73,6 +73,7 @@ public class PostMoney implements CommandExecutor {
         JSONObject payload = new JSONObject();
         payload.put("username", player.getName());
         payload.put("money", howMuchPlayerWant);
+        payload.put("moneyPostStorageId", moneyPostStorageId);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);
@@ -106,6 +107,49 @@ public class PostMoney implements CommandExecutor {
             player.sendMessage("");
             messageUtil.toChat("Ви перекинули " + countMoneyInString);
             player.sendMessage("");
+
+            shulkerWithDiamonOre.setItemMeta(shulkerMeta);
+
+            fetchPostMoneyConfirm();
+        } catch (PlayerError e){
+            messageUtil.toChat(e.getMessage());
+        } catch(Exception e){
+            throw new Error(e);
+        }
+    });
+    }
+
+    private void fetchPostMoneyConfirm() throws Exception{
+
+        String url = "https://mc-back-end.onrender.com/mc/user/money/confirm";
+        HttpPost request = new HttpPost(url);
+
+        JSONObject payload = new JSONObject();
+
+        payload.put("moneyPostStorageId", moneyPostStorageId);
+
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(payload);
+
+        request.setHeader("Content-Type", "application/json");
+        request.setEntity(new StringEntity(jsonPayload, "UTF-8"));
+
+        CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
+
+            HttpResponse response = httpClient.execute(request);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            String responseBody = EntityUtils.toString(response.getEntity());
+            JSONParser parser = new JSONParser();
+            JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
+
+            if(statusCode >= 300 && statusCode < 600) {
+                String errorMessage = jsonResponse.get("message").toString();
+
+                throw new PlayerError("&c" + errorMessage);
+            }
         } catch (PlayerError e){
             messageUtil.toChat(e.getMessage());
         } catch(Exception e){
