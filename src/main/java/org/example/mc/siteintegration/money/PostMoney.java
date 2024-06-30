@@ -98,6 +98,13 @@ public class PostMoney implements CommandExecutor {
                 throw new PlayerError("&c" + errorMessage);
             }
 
+            if (!player.isOnline()) throw new Error("&cГравець вийшов з гри.");
+
+            ItemStack currentItemInMainHand = player.getInventory().getItemInMainHand();
+            if (!currentItemInMainHand.equals(shulkerWithDiamonOre)) {
+                throw new PlayerError("&cВи більше не тримаєте ваш гаманець.");
+            }
+
             String countLittleMoneyInString = "&b" + howMuchPlayerWant + " шт. ⟡";
             String countMoneyInString = howMuchPlayerWant < 64 ? countLittleMoneyInString : "&b" + (howMuchPlayerWant - howMuchPlayerWant % 64) / 64 + "ст. i " + howMuchPlayerWant % 64 + "шт. ⟡";
 
