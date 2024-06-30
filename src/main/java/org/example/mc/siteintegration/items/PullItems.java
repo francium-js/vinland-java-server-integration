@@ -80,9 +80,7 @@ public class PullItems implements CommandExecutor {
 
                 String errorMessage = jsonResponse.get("message").toString();
 
-                messageUtil.toChat("&c" + errorMessage);
-
-                throw new PlayerError(errorMessage);
+                throw new PlayerError("&c" + errorMessage);
             }
 
             Integer needCountSlots = Integer.parseInt(jsonResponse.get("countSlots").toString());
@@ -90,6 +88,8 @@ public class PullItems implements CommandExecutor {
             if(countEmptySlots < needCountSlots) throw new PlayerError("&cВ шалкері не вистачає місця");
 
             fetchPullItems();
+        } catch (PlayerError e){
+            messageUtil.toChat(e.getMessage());
         } catch(Exception e){
             throw new Error(e);
         }
@@ -142,9 +142,7 @@ public class PullItems implements CommandExecutor {
             if(statusCode >= 300 && statusCode < 600) {
                 String errorMessage = jsonResponse.get("message").toString();
 
-                messageUtil.toChat("&c" + errorMessage);
-
-                throw new PlayerError(errorMessage);
+                throw new PlayerError("&c" + errorMessage);
             }
 
             JSONArray serializedArray = (JSONArray) jsonResponse.get("data");
@@ -153,6 +151,8 @@ public class PullItems implements CommandExecutor {
             messageUtil.toActionBar("&aВи успішно забрали предмети");
 
             shulkerBoxInMainHand.setItemMeta(shulkerMeta);
+        } catch (PlayerError e){
+            messageUtil.toChat(e.getMessage());
         } catch(Exception e){
             throw new Error(e);
         }

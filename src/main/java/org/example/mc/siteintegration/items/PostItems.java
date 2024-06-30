@@ -100,14 +100,14 @@ public class PostItems implements CommandExecutor {
 
                 String errorMessage = jsonResponse.get("message").toString();
 
-                messageUtil.toChat("&c" + errorMessage);
-
-                throw new PlayerError(errorMessage);
+                throw new PlayerError("&c" + errorMessage);
                 }
 
                 shulkerBoxInMainHand.setItemMeta(shulkerMeta);
 
                 messageUtil.toActionBar("&aУспішна операція !");
+            } catch (PlayerError e){
+                messageUtil.toChat(e.getMessage());
             } catch(Exception e){
                 throw new Error(e);
             }

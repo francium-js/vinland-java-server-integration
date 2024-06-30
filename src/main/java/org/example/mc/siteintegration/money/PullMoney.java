@@ -93,10 +93,8 @@ public class PullMoney implements CommandExecutor {
 
                 if(statusCode >= 300 && statusCode < 600) {
                     String errorMessage = jsonResponse.get("message").toString();
-
-                    messageUtil.toChat("&c" + errorMessage);
     
-                    throw new PlayerError(errorMessage);
+                    throw new PlayerError("&c" + errorMessage);
                 }
 
                 moneyInAuctionInventory = Integer.parseInt(jsonResponse.get("money").toString());
@@ -104,9 +102,12 @@ public class PullMoney implements CommandExecutor {
                 if(moneyInAuctionInventory < howMuchWantMoney) throw new PlayerError("&cУ вас немає такої кількості валюти");
 
                 inspectShulkerContents();
+            } catch (PlayerError e){
+                messageUtil.toChat(e.getMessage());
             } catch(Exception e){
                 throw new Error(e);
-            }});
+            }
+        });
     }
 
     private void inspectShulkerContents() throws Exception{
@@ -195,9 +196,7 @@ public class PullMoney implements CommandExecutor {
                 if(statusCode >= 300 && statusCode < 600) {
                     String errorMessage = jsonResponse.get("message").toString();
 
-                    messageUtil.toChat("&c" + errorMessage);
-
-                    throw new PlayerError(errorMessage);
+                    throw new PlayerError("&c" + errorMessage);
                 }
     
                 int moneyBefore = Integer.parseInt(jsonResponse.get("moneyBefore").toString());
@@ -216,6 +215,8 @@ public class PullMoney implements CommandExecutor {
                 this.player.sendMessage("");
 
                 this.shulkerWithDiamonOre.setItemMeta(this.shulkerMeta);
+            } catch (PlayerError e){
+                messageUtil.toChat(e.getMessage());
             } catch(Exception e){
                 throw new Error(e);
             }

@@ -70,9 +70,7 @@ public class GetMoneyInfo implements CommandExecutor {
 
                 String errorMessage = jsonResponse.get("message").toString();
 
-                messageUtil.toChat("&c" + errorMessage);
-
-                throw new PlayerError(errorMessage);
+                throw new PlayerError("&c" + errorMessage);
             }
 
             int moneyCount = Integer.parseInt(jsonResponse.get("money").toString());
@@ -83,6 +81,8 @@ public class GetMoneyInfo implements CommandExecutor {
             messageUtil.toChat(moneyCalculator(moneyCount));
             player.sendMessage("");
 
+        } catch (PlayerError e){
+            messageUtil.toChat(e.getMessage());
         } catch(Exception e){
             throw new Error(e);
         }

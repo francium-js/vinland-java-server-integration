@@ -92,9 +92,7 @@ public class PostMoney implements CommandExecutor {
             if(statusCode >= 300 && statusCode < 600) {
                 String errorMessage = jsonResponse.get("message").toString();
 
-                messageUtil.toChat("&c" + errorMessage);
-
-                throw new PlayerError(errorMessage);
+                throw new PlayerError("&c" + errorMessage);
             }
 
             String countLittleMoneyInString = "&b" + howMuchPlayerWant + " шт. ⟡";
@@ -108,6 +106,8 @@ public class PostMoney implements CommandExecutor {
             player.sendMessage("");
 
             shulkerWithDiamonOre.setItemMeta(shulkerMeta);
+        } catch (PlayerError e){
+            messageUtil.toChat(e.getMessage());
         } catch(Exception e){
             throw new Error(e);
         }

@@ -14,7 +14,7 @@ public class DatabaseManager {
         return CompletableFuture.runAsync(() -> {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3305/root", "root", "root");
+                connection = DriverManager.getConnection("jdbc:mysql://db.majorcore.com:3306/s763_mcSiteIntegration", "u763_yWyPUzAWaz", "=r2Cu3vB=WyJ3Ge95I6mtEj7");
                 Bukkit.getLogger().info("connection");
             } catch (ClassNotFoundException | SQLException e) {
                 throw new RuntimeException(e);
