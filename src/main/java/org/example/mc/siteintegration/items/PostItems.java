@@ -27,6 +27,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +40,8 @@ public class PostItems implements CommandExecutor {
     private JSONArray itemsInShulker;
     private BlockStateMeta shulkerMeta;
     private PlayerMessageUtil messageUtil;
+    private String itemsStorageId = UUID.randomUUID().toString();
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -67,6 +70,47 @@ public class PostItems implements CommandExecutor {
 
         return true;
     }
+    
+    private void fetchPostItemsConfirm () throws Exception {
+        messageUtil.toActionBar("&eТриває операція");
+
+        String url = "https://mc-back-end.onrender.com/mc/user/items/confirm";
+        HttpPost request = new HttpPost(url);
+
+        JSONObject payload = new JSONObject();
+
+        payload.put("itemsStorageId", itemsStorageId);
+
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(payload);
+
+        request.setHeader("Content-Type", "application/json");
+        request.setEntity(new StringEntity(jsonPayload, "UTF-8"));
+
+        CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
+        
+                HttpResponse response = httpClient.execute(request);
+
+                int statusCode = response.getStatusLine().getStatusCode();
+
+                if(statusCode >= 300 && statusCode < 600) {
+                
+                String responseBody = EntityUtils.toString(response.getEntity());
+                JSONParser parser = new JSONParser();
+                JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
+
+                String errorMessage = jsonResponse.get("message").toString();
+
+                throw new PlayerError("&c" + errorMessage);
+                }
+            } catch (PlayerError e){
+                messageUtil.toChat(e.getMessage());
+            } catch(Exception e){
+                throw new Error(e);
+            }
+        });
+    }
 
     private void fetchPostItems () throws Exception {
         messageUtil.toActionBar("&eТриває операція");
@@ -78,6 +122,7 @@ public class PostItems implements CommandExecutor {
 
         payload.put("username", player.getName());
         payload.put("data", itemsInShulker);
+        payload.put("itemsStorageId", itemsStorageId);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);
@@ -103,9 +148,18 @@ public class PostItems implements CommandExecutor {
                 throw new PlayerError("&c" + errorMessage);
                 }
 
+                if (!player.isOnline()) throw new Error("&cГравець вийшов з гри.");
+
+                ItemStack currentItemInMainHand = player.getInventory().getItemInMainHand();
+                if (!currentItemInMainHand.equals(shulkerBoxInMainHand)) {
+                    throw new PlayerError("&cВи більше не тримаєте шалкер у руці.");
+                }
+
                 shulkerBoxInMainHand.setItemMeta(shulkerMeta);
 
                 messageUtil.toActionBar("&aУспішна операція !");
+
+                fetchPostItemsConfirm();
             } catch (PlayerError e){
                 messageUtil.toChat(e.getMessage());
             } catch(Exception e){

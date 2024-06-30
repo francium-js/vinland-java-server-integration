@@ -3,6 +3,7 @@ package org.example.mc.siteintegration.items;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -121,10 +122,39 @@ public class PullItems implements CommandExecutor {
         shulkerMeta.setBlockState(shulkerBox);
     }
 
+    private void fetchDeleteItems() throws Exception  {
+        String url = "https://mc-back-end.onrender.com/mc/user/items/delete/" + itemTicketId;
+        HttpDelete request = new HttpDelete(url);
+
+        CompletableFuture.runAsync(() -> {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
+
+            HttpResponse response = httpClient.execute(request);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            String responseBody = EntityUtils.toString(response.getEntity());
+
+            JSONParser parser = new JSONParser();
+            JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
+
+            if(statusCode >= 300 && statusCode < 600) {
+                String errorMessage = jsonResponse.get("message").toString();
+
+                throw new PlayerError("&c" + errorMessage);
+            }
+        } catch (PlayerError e){
+            messageUtil.toChat(e.getMessage());
+        } catch(Exception e){
+            throw new Error(e);
+        }
+    });
+    }
+
     private void fetchPullItems() throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/items/" + itemTicketId;
+        String url = "https://mc-back-end.onrender.com/mc/user/items/pull/" + itemTicketId;
         HttpPut request = new HttpPut(url);
 
         CompletableFuture.runAsync(() -> {
@@ -148,9 +178,18 @@ public class PullItems implements CommandExecutor {
             JSONArray serializedArray = (JSONArray) jsonResponse.get("data");
             containNewItemToShulker(serializedArray);
 
+            if (!player.isOnline()) throw new Error("&cГравець вийшов з гри.");
+
+            ItemStack currentItemInMainHand = player.getInventory().getItemInMainHand();
+            if (!currentItemInMainHand.equals(shulkerBoxInMainHand)) {
+                throw new PlayerError("&cВи більше не тримаєте шалкер у руці.");
+            }
+
             messageUtil.toActionBar("&aВи успішно забрали предмети");
 
             shulkerBoxInMainHand.setItemMeta(shulkerMeta);
+
+            fetchDeleteItems();
         } catch (PlayerError e){
             messageUtil.toChat(e.getMessage());
         } catch(Exception e){
