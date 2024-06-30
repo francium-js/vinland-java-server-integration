@@ -128,7 +128,7 @@ public class SiteIntegration extends JavaPlugin {
     private void fetchPutAdvancements(String username, Object advancements) {
     CompletableFuture.runAsync(() -> {
         HttpClient httpClient = HttpClients.createDefault();
-        String url = "http://localhost:8080/mc/user/advancements";
+        String url = "https://mc-back-end.onrender.com/mc/user/advancements";
         HttpPut request = new HttpPut(url);
 
         try {

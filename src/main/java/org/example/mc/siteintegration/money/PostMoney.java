@@ -65,7 +65,7 @@ public class PostMoney implements CommandExecutor {
     private void fetchPostMoney() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/user/money";
+        String url = "https://mc-back-end.onrender.com/mc/user/money";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
@@ -91,6 +91,8 @@ public class PostMoney implements CommandExecutor {
 
             if(statusCode >= 300 && statusCode < 600) {
                 String errorMessage = jsonResponse.get("message").toString();
+
+                messageUtil.toChat(errorMessage);
 
                 throw new PlayerError(errorMessage);
             }

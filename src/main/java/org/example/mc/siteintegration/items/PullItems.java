@@ -62,7 +62,7 @@ public class PullItems implements CommandExecutor {
     private void fetchGetItemTicketInfo() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/item_ticket/countSlots?username="+ player.getName() + "&itemTicketId=" + itemTicketId;
+        String url = "https://mc-back-end.onrender.com/mc/item_ticket/countSlots?username="+ player.getName() + "&itemTicketId=" + itemTicketId;
         HttpGet request = new HttpGet(url);
 
         CompletableFuture.runAsync(() -> {
@@ -79,6 +79,8 @@ public class PullItems implements CommandExecutor {
             if(statusCode >= 300 && statusCode < 600) {
 
                 String errorMessage = jsonResponse.get("message").toString();
+
+                messageUtil.toChat(errorMessage);
 
                 throw new PlayerError(errorMessage);
             }
@@ -122,7 +124,7 @@ public class PullItems implements CommandExecutor {
     private void fetchPullItems() throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/user/items/" + itemTicketId;
+        String url = "https://mc-back-end.onrender.com/mc/user/items/" + itemTicketId;
         HttpPut request = new HttpPut(url);
 
         CompletableFuture.runAsync(() -> {
@@ -139,6 +141,8 @@ public class PullItems implements CommandExecutor {
 
             if(statusCode >= 300 && statusCode < 600) {
                 String errorMessage = jsonResponse.get("message").toString();
+
+                messageUtil.toChat(errorMessage);
 
                 throw new PlayerError(errorMessage);
             }
