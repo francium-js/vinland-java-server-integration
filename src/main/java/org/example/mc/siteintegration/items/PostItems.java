@@ -72,7 +72,6 @@ public class PostItems implements CommandExecutor {
     }
     
     private void fetchPostItemsConfirm () throws Exception {
-        messageUtil.toActionBar("&eТриває операція");
 
         String url = "https://mc-back-end.onrender.com/mc/user/items/confirm";
         HttpPost request = new HttpPost(url);
@@ -155,9 +154,9 @@ public class PostItems implements CommandExecutor {
                     throw new PlayerError("&cВи більше не тримаєте шалкер у руці.");
                 }
 
-                shulkerBoxInMainHand.setItemMeta(shulkerMeta);
-
                 messageUtil.toActionBar("&aУспішна операція !");
+
+                shulkerBoxInMainHand.setItemMeta(shulkerMeta);
 
                 fetchPostItemsConfirm();
             } catch (PlayerError e){
