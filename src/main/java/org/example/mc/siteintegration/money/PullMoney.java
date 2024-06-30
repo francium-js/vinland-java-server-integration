@@ -64,13 +64,13 @@ public class PullMoney implements CommandExecutor {
     }
 
     private void inspectShulkerInHand() throws Exception{
-        this.shulkerMeta = (BlockStateMeta) this.shulkerWithDiamonOre.getItemMeta();
+        shulkerMeta = (BlockStateMeta) shulkerWithDiamonOre.getItemMeta();
 
-        if (this.shulkerMeta == null || !(this.shulkerMeta.getBlockState() instanceof ShulkerBox)) {
+        if (shulkerMeta == null || !(shulkerMeta.getBlockState() instanceof ShulkerBox)) {
             throw new PlayerError("&cВ руках повинен бути ваш гаманець");
         }
 
-        String shulkerboxName = this.shulkerMeta.getDisplayName();
+        String shulkerboxName = shulkerMeta.getDisplayName();
         String skulherboxInHand = "Гаманець " + player.getName();
         boolean isIdentical = shulkerboxName.equals(skulherboxInHand);
 
@@ -177,6 +177,7 @@ public class PullMoney implements CommandExecutor {
         
         payload.put("username", player.getName());
         payload.put("money", howMuchWantMoney);
+        payload.put("moneyStorageId", moneyStorageId);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);
@@ -216,14 +217,14 @@ public class PullMoney implements CommandExecutor {
     
                 String countMoneyInString = howMuchWantMoney % 64 == 0 ? moneyCountInStack : howMuchWantMoney < 64 ? countLittleMoneyInString : "&b" + (howMuchWantMoney - howMuchWantMoney % 64) / 64 + "ст. i " + howMuchWantMoney % 64 + "шт. ⟡";
     
-                this.messageUtil.toActionBar("&aУспішна операція !");
+                messageUtil.toActionBar("&aУспішна операція !");
     
-                this.player.sendMessage("");
-                this.messageUtil.toChat("&7Ви зняли &b" + countMoneyInString);
-                this.messageUtil.toChat("&b" + moneyBefore + "⟡ &7---> " + "&b" + moneyAfter + "⟡");
-                this.player.sendMessage("");
+                player.sendMessage("");
+                messageUtil.toChat("&7Ви зняли &b" + countMoneyInString);
+                messageUtil.toChat("&b" + moneyBefore + "⟡ &7---> " + "&b" + moneyAfter + "⟡");
+                player.sendMessage("");
 
-                this.shulkerWithDiamonOre.setItemMeta(this.shulkerMeta);
+                shulkerWithDiamonOre.setItemMeta(shulkerMeta);
 
                 fetchPutMoneyConfirm();
             } catch (PlayerError e){

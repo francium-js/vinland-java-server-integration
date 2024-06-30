@@ -48,6 +48,8 @@ public class PostMoney implements CommandExecutor {
             inspectShulkerInHande();
             inspectShulker();
 
+            shulkerWithDiamonOre.setItemMeta(shulkerMeta);
+
             fetchPostMoney();
         } catch (PlayerError e){
             messageUtil.toActionBar(e.getMessage());
@@ -104,8 +106,6 @@ public class PostMoney implements CommandExecutor {
             player.sendMessage("");
             messageUtil.toChat("Ви перекинули " + countMoneyInString);
             player.sendMessage("");
-
-            shulkerWithDiamonOre.setItemMeta(shulkerMeta);
         } catch (PlayerError e){
             messageUtil.toChat(e.getMessage());
         } catch(Exception e){
