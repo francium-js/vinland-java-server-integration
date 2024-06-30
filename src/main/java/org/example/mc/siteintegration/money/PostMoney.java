@@ -32,7 +32,7 @@ public class PostMoney implements CommandExecutor {
     private ItemStack shulkerWithDiamonOre;
     private BlockStateMeta shulkerMeta;
     private PlayerMessageUtil messageUtil;
-    private String moneyPostStorageId = UUID.randomUUID().toString();
+    private String moneyStorageId = UUID.randomUUID().toString();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -73,7 +73,7 @@ public class PostMoney implements CommandExecutor {
         JSONObject payload = new JSONObject();
         payload.put("username", player.getName());
         payload.put("money", howMuchPlayerWant);
-        payload.put("moneyPostStorageId", moneyPostStorageId);
+        payload.put("moneyStorageId", moneyStorageId);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);
@@ -126,7 +126,7 @@ public class PostMoney implements CommandExecutor {
 
         JSONObject payload = new JSONObject();
 
-        payload.put("moneyPostStorageId", moneyPostStorageId);
+        payload.put("moneyStorageId", moneyStorageId);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);

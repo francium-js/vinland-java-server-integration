@@ -34,7 +34,7 @@ public class PullMoney implements CommandExecutor {
     private Integer howMuchWantMoney;
     private BlockStateMeta shulkerMeta;
     private PlayerMessageUtil messageUtil;
-    private String moneyPullStorageId = UUID.randomUUID().toString();
+    private String moneyStorageId = UUID.randomUUID().toString();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -177,7 +177,7 @@ public class PullMoney implements CommandExecutor {
         
         payload.put("username", player.getName());
         payload.put("money", howMuchWantMoney);
-        payload.put("moneyPullStorageId", moneyPullStorageId);
+        payload.put("moneyStorageId", moneyStorageId);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);
@@ -241,7 +241,7 @@ public class PullMoney implements CommandExecutor {
 
         JSONObject payload = new JSONObject();
     
-        payload.put("moneyPullStorageId", moneyPullStorageId);
+        payload.put("moneyStorageId", moneyStorageId);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);
