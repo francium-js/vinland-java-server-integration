@@ -4,12 +4,16 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
+
 public class User {
     private String username;
     private String passwordHash;
     private UUID uuid;
     private String ip;
     private Instant mcSession;
+    private boolean isAuth;
 
     public User(String username, String passwordHash, UUID uuid, String ip, Instant mcSession) {
         this.username = username;
@@ -17,6 +21,7 @@ public class User {
         this.uuid = uuid;
         this.ip = ip;
         this.mcSession = mcSession;
+        this.isAuth = false;
     }
 
     public String getUsername() {
@@ -54,5 +59,19 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(username);
+    }
+
+    public boolean isAuth() {
+        return isAuth;
+    }
+
+    public void setAuth(boolean auth) {
+        isAuth = auth;
+    }
+
+    public void setFreePlayer(Player player){
+        player.removePotionEffect(PotionEffectType.BLINDNESS); 
+        player.setAllowFlight(true);
+        player.setInvulnerable(false);
     }
 }

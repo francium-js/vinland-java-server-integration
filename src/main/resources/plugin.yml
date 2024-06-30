@@ -6,14 +6,3 @@ commands:
   trade:
     description: Виконати різні торгові операції
     usage: /<command> <subcommand> [amount]
-  reg:
-    description: Реєстрація на сервері
-    usage: /register <password> <repetPassword>
-    aliases:
-      - reg
-  login:
-    description: Логін на сервері
-    usage: /login <password>
-    aliases:
-      - l
-      - log

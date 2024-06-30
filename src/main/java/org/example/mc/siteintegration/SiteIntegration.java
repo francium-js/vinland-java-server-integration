@@ -8,13 +8,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.example.mc.siteintegration.commands.LoginCommand;
-import org.example.mc.siteintegration.commands.RegCommand;
 import org.example.mc.siteintegration.commands.TradeCommandExecutor;
 import org.example.mc.siteintegration.commands.TradeTabCompleter;
-import org.example.mc.siteintegration.listeners.PlayerListener;
-import org.example.mc.siteintegration.managers.DatabaseManager;
-import org.example.mc.siteintegration.managers.UserManager;
 import org.json.simple.JSONObject;
 
 import java.io.FileReader;
@@ -31,37 +26,10 @@ public class SiteIntegration extends JavaPlugin {
     private final Gson gson = new Gson();
     private Logger logger;
 
-    private UserManager userManager;
-
     @Override
     public void onEnable() {
         logger = getLogger();
         getLogger().info("ShulkerInspectPlugin has been enabled!");
-
-        // Initialize database connection and userManager
-        DatabaseManager.initialize().thenRun(() -> {
-            userManager = new UserManager(DatabaseManager.getConnection());
-
-            userManager.loadUsers().thenRun(() -> {
-                // Register events
-                getServer().getPluginManager().registerEvents(new PlayerListener(userManager), this);
-
-                getCommand("reg").setExecutor(new RegCommand(userManager));
-                getCommand("login").setExecutor(new LoginCommand(userManager));
-
-                getLogger().info("SiteIntegration enabled!");
-            }).exceptionally(ex -> {
-                getLogger().severe("Failed to load user data!");
-                ex.printStackTrace();
-                return null;
-            });
-
-        }).exceptionally(ex -> {
-            getLogger().severe("Failed to connect to the database!");
-            ex.printStackTrace();
-            getServer().getPluginManager().disablePlugin(this);
-            return null;
-        });
 
         TradeCommandExecutor tradeExecutor = new TradeCommandExecutor();
 
