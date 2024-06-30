@@ -100,7 +100,7 @@ public class PostItems implements CommandExecutor {
 
                 String errorMessage = jsonResponse.get("message").toString();
 
-                messageUtil.toChat(errorMessage);
+                messageUtil.toChat("&c" + errorMessage);
 
                 throw new PlayerError(errorMessage);
                 }
