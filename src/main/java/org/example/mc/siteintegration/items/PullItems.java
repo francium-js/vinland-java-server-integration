@@ -63,7 +63,7 @@ public class PullItems implements CommandExecutor {
     private void fetchGetItemTicketInfo() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/item_ticket/countSlots?username="+ player.getName() + "&itemTicketId=" + itemTicketId;
+        String url = "http://localhost:8080/mc/item_ticket/countSlots?username="+ player.getName() + "&itemTicketId=" + itemTicketId;
         HttpGet request = new HttpGet(url);
 
         CompletableFuture.runAsync(() -> {
@@ -123,7 +123,7 @@ public class PullItems implements CommandExecutor {
     }
 
     private void fetchDeleteItems() throws Exception  {
-        String url = "https://mc-back-end.onrender.com/mc/user/items/delete/" + itemTicketId;
+        String url = "http://localhost:8080/mc/user/items/delete/" + itemTicketId;
         HttpDelete request = new HttpDelete(url);
 
         CompletableFuture.runAsync(() -> {
@@ -154,7 +154,7 @@ public class PullItems implements CommandExecutor {
     private void fetchPullItems() throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/items/pull/" + itemTicketId;
+        String url = "http://localhost:8080/mc/user/items/pull/" + itemTicketId;
         HttpPut request = new HttpPut(url);
 
         CompletableFuture.runAsync(() -> {

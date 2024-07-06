@@ -51,7 +51,7 @@ public class GetMoneyInfo implements CommandExecutor {
     private void fetchGetMoneyCount() throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-            String url = "https://mc-back-end.onrender.com/mc/user/money/" + player.getName();
+            String url = "http://localhost:8080/mc/user/money/" + player.getName();
             HttpGet request = new HttpGet(url);
 
             CompletableFuture.runAsync(() -> {

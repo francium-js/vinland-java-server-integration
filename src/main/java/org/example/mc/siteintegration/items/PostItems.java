@@ -73,7 +73,7 @@ public class PostItems implements CommandExecutor {
     
     private void fetchPostItemsConfirm () throws Exception {
 
-        String url = "https://mc-back-end.onrender.com/mc/user/items/confirm";
+        String url = "http://localhost:8080/mc/user/items/confirm";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
@@ -114,7 +114,7 @@ public class PostItems implements CommandExecutor {
     private void fetchPostItems () throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/items";
+        String url = "http://localhost:8080/mc/user/items";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
