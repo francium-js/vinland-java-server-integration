@@ -11,7 +11,7 @@ import java.util.List;
 
 public class TradeTabCompleter implements TabCompleter {
 
-    private static final List<String> SUBCOMMANDS = Arrays.asList("валюта(інформація)", "валюта(забрати)", "предмети(забрати)", "валюта(закинути)", "предмети(закинути)");
+    private static final List<String> SUBCOMMANDS = Arrays.asList("валюта(інформація)", "валюта(забрати)", "предмети(забрати)", "валюта(закинути)", "предмети(закинути)","шалкер(закинути)");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

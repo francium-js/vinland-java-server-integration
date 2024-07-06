@@ -8,6 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.example.mc.siteintegration.items.PostItems;
+import org.example.mc.siteintegration.items.PostShulker;
 import org.example.mc.siteintegration.items.PullItems;
 import org.example.mc.siteintegration.money.GetMoneyInfo;
 import org.example.mc.siteintegration.money.PostMoney;
@@ -70,6 +71,8 @@ public class TradeCommandExecutor implements CommandExecutor {
                 return new PullItems().onCommand(sender, command, label, newArgs);
             case "предмети(закинути)":
                 return new PostItems().onCommand(sender, command, label, newArgs);
+            case "шалкер(закинути)":
+                return new PostShulker().onCommand(sender, command, label, newArgs);
             default:
                 sendMessageToActionBar("&cНевідома операція: " + subCommand);
                 return false;

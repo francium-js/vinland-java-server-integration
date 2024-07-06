@@ -175,9 +175,6 @@ public class PullItems implements CommandExecutor {
                 throw new PlayerError("&c" + errorMessage);
             }
 
-            JSONArray serializedArray = (JSONArray) jsonResponse.get("data");
-            containNewItemToShulker(serializedArray);
-
             if (!player.isOnline()) throw new Error("&cГравець вийшов з гри.");
 
             ItemStack currentItemInMainHand = player.getInventory().getItemInMainHand();
@@ -185,9 +182,12 @@ public class PullItems implements CommandExecutor {
                 throw new PlayerError("&cВи більше не тримаєте шалкер у руці.");
             }
 
-            messageUtil.toActionBar("&aВи успішно забрали предмети");
+            JSONArray serializedArray = (JSONArray) jsonResponse.get("data");
+            containNewItemToShulker(serializedArray);
 
             shulkerBoxInMainHand.setItemMeta(shulkerMeta);
+            
+            messageUtil.toActionBar("&aВи успішно забрали предмети");
 
             fetchDeleteItems();
         } catch (PlayerError e){
