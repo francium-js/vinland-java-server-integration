@@ -1,4 +1,4 @@
-package org.example.mc.siteintegration.items;
+package org.example.mc.siteintegration.shulkers;
 
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
@@ -9,6 +9,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.example.mc.siteintegration.entities.ShulkerData;
 import org.example.mc.siteintegration.helpers.ItemSerializer;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
@@ -34,13 +36,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class PostItems implements CommandExecutor {
+public class PostShulker implements CommandExecutor {
 
     private Player player;
     private ItemStack shulkerBoxInMainHand;
     private JSONArray itemsInShulker;
     private BlockStateMeta shulkerMeta;
     private PlayerMessageUtil messageUtil;
+    private ShulkerData shulkerData;
     private String cacheId = UUID.randomUUID().toString();
 
 
@@ -59,7 +62,7 @@ public class PostItems implements CommandExecutor {
             inspectShulkerInHand();
             inspectShulker();
             
-            fetchPostItems();
+            fetchPostShulker();
         } catch (PlayerError e){
             messageUtil.toActionBar(e.getMessage());
             return false;
@@ -72,15 +75,15 @@ public class PostItems implements CommandExecutor {
         return true;
     }
     
-    private void fetchPostItemsConfirm () throws Exception {
+    private void fetchPostShulkerConfirm () throws Exception {
 
-        String url = "http://localhost:8080/mc/user/items/confirm";
+        String url = "https://mc-back-end.onrender.com/mc/user/shulkers/confirm";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
 
-        payload.put("username", player.getName());
         payload.put("cacheId", cacheId);
+        payload.put("username", player.getName());
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);
@@ -113,17 +116,18 @@ public class PostItems implements CommandExecutor {
         });
     }
 
-    private void fetchPostItems () throws Exception {
+    private void fetchPostShulker () throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/user/items";
+        String url = "https://mc-back-end.onrender.com/mc/user/shulkers";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
 
         payload.put("username", player.getName());
-        payload.put("data", itemsInShulker);
+        payload.put("itemsData", itemsInShulker);
         payload.put("cacheId", cacheId);
+        payload.put("shulkerData", shulkerData);
 
         Gson gson = new Gson();
         String jsonPayload = gson.toJson(payload);
@@ -158,9 +162,9 @@ public class PostItems implements CommandExecutor {
 
                 messageUtil.toActionBar("&aУспішна операція !");
 
-                shulkerBoxInMainHand.setItemMeta(shulkerMeta);
+                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
 
-                fetchPostItemsConfirm();
+                fetchPostShulkerConfirm();
             } catch (PlayerError e){
                 messageUtil.toChat(e.getMessage());
             } catch(Exception e){
@@ -196,12 +200,6 @@ public class PostItems implements CommandExecutor {
                     itemObject.put("type", itemSlot.getType().toString().toLowerCase());
                     itemObject.put("amount", itemSlot.getAmount());
                     itemObject.put("display_name", itemMeta.getDisplayName());
-
-                    if (itemSlot.getType().getMaxDurability() > 0) {
-                        short maxDurability = itemSlot.getType().getMaxDurability();
-                        short currentDurability = (short) (maxDurability - itemSlot.getDurability());
-                        itemObject.put("durability", currentDurability + " / " + maxDurability);
-                    }
 
                     JSONArray result = new JSONArray();
 
@@ -253,12 +251,12 @@ public class PostItems implements CommandExecutor {
                 }
             }
         }
-
         if(itemsArray.isEmpty()) throw new PlayerError("&cШалкер пустий");
 
-        shulkerBox.getInventory().setContents(contentsArray);
-        shulkerMeta.setBlockState(shulkerBox);
+        String type = shulkerBox.getType().toString().toLowerCase();
+        String display_name = shulkerMeta.getDisplayName();
 
+        shulkerData = new ShulkerData(display_name, type);
         itemsInShulker = itemsArray;
     }
 
