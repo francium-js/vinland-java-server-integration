@@ -190,7 +190,7 @@ public class PostShulker implements CommandExecutor {
                 if (itemMeta != null) {
                     String item_id = itemSlot.getType().name();
 
-                    if (item_id.contains("DEEPSLATE_DIAMOND_ORE")) continue;
+                    if (item_id.contains("DEEPSLATE_DIAMOND_ORE")) throw new PlayerError("&cВ шалкері не може бути валюта");
 
                     if (itemMeta instanceof PotionMeta) continue;
 
