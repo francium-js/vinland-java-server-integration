@@ -13,6 +13,7 @@ import org.example.mc.siteintegration.money.GetMoneyInfo;
 import org.example.mc.siteintegration.money.PostMoney;
 import org.example.mc.siteintegration.money.PullMoney;
 import org.example.mc.siteintegration.shulkers.PostShulker;
+import org.example.mc.siteintegration.shulkers.PullShulker;
 
 public class TradeCommandExecutor implements CommandExecutor {
     private Player player;
@@ -73,6 +74,8 @@ public class TradeCommandExecutor implements CommandExecutor {
                 return new PostItems().onCommand(sender, command, label, newArgs);
             case "шалкер(закинути)":
                 return new PostShulker().onCommand(sender, command, label, newArgs);
+            case "шалкер(забрати)":
+                return new PullShulker().onCommand(sender, command, label, newArgs);
             default:
                 sendMessageToActionBar("&cНевідома операція: " + subCommand);
                 return false;
