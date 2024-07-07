@@ -8,11 +8,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.example.mc.siteintegration.items.PostItems;
-import org.example.mc.siteintegration.items.PostShulker;
 import org.example.mc.siteintegration.items.PullItems;
 import org.example.mc.siteintegration.money.GetMoneyInfo;
 import org.example.mc.siteintegration.money.PostMoney;
 import org.example.mc.siteintegration.money.PullMoney;
+import org.example.mc.siteintegration.shulkers.PostShulker;
 
 public class TradeCommandExecutor implements CommandExecutor {
     private Player player;

@@ -1,15 +1,16 @@
-package org.example.mc.siteintegration.items;
+package org.example.mc.siteintegration.shulkers;
 
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -24,12 +25,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-public class PullItems implements CommandExecutor {
+import com.google.gson.Gson;
+
+public class PullShulker implements CommandExecutor {
 
     private Player player;
-    private ItemStack shulkerBoxInMainHand;
-    private Integer itemTicketId;
-    private Integer countEmptySlots = 0;
+    private ItemStack itemInHand;
+    private Integer shulkerId;
     private BlockStateMeta shulkerMeta;
     private PlayerMessageUtil messageUtil;
 
@@ -43,12 +45,11 @@ public class PullItems implements CommandExecutor {
 
             this.player = (Player) sender;
             this.messageUtil = new PlayerMessageUtil(player);
-            this.itemTicketId = Integer.parseInt(args[0]);;
-            this.shulkerBoxInMainHand = player.getInventory().getItemInMainHand();
+            this.shulkerId = Integer.parseInt(args[0]);
+            this.itemInHand = player.getInventory().getItemInMainHand();
 
-            inspectShulkerInHand();
-            inspectShulkerContents();
-            fetchGetItemTicketInfo();
+            inspectItemInHand();
+            fetchPullShulker();
         } catch (PlayerError e){
             messageUtil.toActionBar(e.getMessage());
             return false;
@@ -59,43 +60,6 @@ public class PullItems implements CommandExecutor {
         }
 
         return true;
-    }
-
-    private void fetchGetItemTicketInfo() throws Exception{
-        messageUtil.toActionBar("&eТриває операція");
-
-        String url = "https://mc-back-end.onrender.com/mc/item_ticket/countSlots?username="+ player.getName() + "&itemTicketId=" + itemTicketId;
-        HttpGet request = new HttpGet(url);
-
-        CompletableFuture.runAsync(() -> {
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
-
-            HttpResponse response = httpClient.execute(request);
-
-            int statusCode = response.getStatusLine().getStatusCode();
-
-            String responseBody = EntityUtils.toString(response.getEntity());
-            JSONParser parser = new JSONParser();
-            JSONObject jsonResponse = (JSONObject) parser.parse(responseBody);
-
-            if(statusCode >= 300 && statusCode < 600) {
-
-                String errorMessage = jsonResponse.get("message").toString();
-
-                throw new PlayerError("&c" + errorMessage);
-            }
-
-            Integer needCountSlots = Integer.parseInt(jsonResponse.get("countSlots").toString());
-
-            if(countEmptySlots < needCountSlots) throw new PlayerError("&cВ шалкері не вистачає місця");
-
-            fetchPullItems();
-        } catch (PlayerError e){
-            messageUtil.toChat(e.getMessage());
-        } catch(Exception e){
-            throw new Error(e);
-        }
-    });
     }
 
     private void containNewItemToShulker(JSONArray serializedArray) throws Exception{
@@ -124,7 +88,7 @@ public class PullItems implements CommandExecutor {
     }
 
     private void fetchDeleteItems() throws Exception  {
-        String url = "https://mc-back-end.onrender.com/mc/user/items/delete/" + itemTicketId;
+        String url = "https://mc-back-end.onrender.com/mc/user/shulker/" + shulkerId;
         HttpDelete request = new HttpDelete(url);
 
         CompletableFuture.runAsync(() -> {
@@ -152,11 +116,21 @@ public class PullItems implements CommandExecutor {
     });
     }
 
-    private void fetchPullItems() throws Exception  {
+    private void fetchPullShulker() throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/items/pull/" + itemTicketId;
+        String url = "https://mc-back-end.onrender.com/mc/user/shulker";
         HttpPut request = new HttpPut(url);
+
+        JSONObject payload = new JSONObject();
+        payload.put("username", player.getName());
+        payload.put("shulkerId", shulkerId);
+
+        Gson gson = new Gson();
+        String jsonPayload = gson.toJson(payload);
+
+        request.setHeader("Content-Type", "application/json");
+        request.setEntity(new StringEntity(jsonPayload, "UTF-8"));
 
         CompletableFuture.runAsync(() -> {
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) { 
@@ -176,17 +150,22 @@ public class PullItems implements CommandExecutor {
                 throw new PlayerError("&c" + errorMessage);
             }
 
-            if (!player.isOnline()) throw new Error("&cГравець вийшов з гри.");
+            inspectItemInHand();
 
-            ItemStack currentItemInMainHand = player.getInventory().getItemInMainHand();
-            if (!currentItemInMainHand.equals(shulkerBoxInMainHand)) {
-                throw new PlayerError("&cВи більше не тримаєте шалкер у руці.");
-            }
+            JSONArray serializedArray = (JSONArray) jsonResponse.get("shulkerItemsData");
+            String shulkerType = jsonResponse.get("shulkerType").toString().toUpperCase();
+            String shulkerName = jsonResponse.get("shulkerName").toString();
 
-            JSONArray serializedArray = (JSONArray) jsonResponse.get("data");
+            Material material = Material.valueOf(shulkerType);
+
+            ItemStack shulkerBoxItem = new ItemStack(material);
+
             containNewItemToShulker(serializedArray);
 
-            shulkerBoxInMainHand.setItemMeta(shulkerMeta);
+            shulkerMeta.setDisplayName(shulkerName);
+
+            shulkerBoxItem.setItemMeta(shulkerMeta);
+            player.getInventory().setItemInMainHand(shulkerBoxItem);
             
             messageUtil.toActionBar("&aВи успішно забрали предмети");
 
@@ -199,23 +178,11 @@ public class PullItems implements CommandExecutor {
     });
     }
 
-    private void inspectShulkerContents() {
-        ShulkerBox shulkerBox = (ShulkerBox) shulkerMeta.getBlockState();
+    private void inspectItemInHand() throws Exception{
+        if (!player.isOnline()) throw new Error("&cГравець вийшов з гри.");
 
-        ItemStack[] contentsArray = shulkerBox.getInventory().getContents();
-
-        for (int i = 0; i < contentsArray.length; i++) {
-            ItemStack itemSlot = contentsArray[i];
-
-            if (itemSlot == null) countEmptySlots+= 1;
-        }
-    }
-
-    private void inspectShulkerInHand() throws Exception{
-        this.shulkerMeta = (BlockStateMeta) player.getInventory().getItemInMainHand().getItemMeta();
-
-        if (shulkerMeta == null || !(shulkerMeta.getBlockState() instanceof ShulkerBox)) {
-            throw new PlayerError("&cВ руках повинен бути шалкер");
+        if (itemInHand != null || itemInHand.getType() != Material.AIR) {
+            throw new PlayerError("&cВ руках нічого не повинно бути");
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.example.mc.siteintegration.items;
+package org.example.mc.siteintegration.shulkers;
 
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
@@ -22,6 +22,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.example.mc.siteintegration.entities.ShulkerData;
+import org.example.mc.siteintegration.helpers.ItemSerializer;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
 import org.json.simple.JSONArray;
