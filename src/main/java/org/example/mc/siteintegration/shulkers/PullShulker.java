@@ -88,7 +88,7 @@ public class PullShulker implements CommandExecutor {
     }
 
     private void fetchDeleteItems() throws Exception  {
-        String url = "https://mc-back-end.onrender.com/mc/user/shulker/" + shulkerId;
+        String url = "https://mc-back-end.onrender.com/mc/user/shulker/" + shulkerId + '/' + player.getName();
         HttpDelete request = new HttpDelete(url);
 
         CompletableFuture.runAsync(() -> {

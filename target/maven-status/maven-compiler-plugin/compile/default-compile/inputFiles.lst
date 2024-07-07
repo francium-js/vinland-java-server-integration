@@ -1,3 +1,4 @@
+C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\shulkers\PullShulker.java
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\money\GetMoneyInfo.java
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\utils\PlayerError.java
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\commands\TradeCommandExecutor.java
@@ -6,8 +7,8 @@ C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\money
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\entities\ShulkerData.java
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\money\PullMoney.java
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\utils\PlayerMessageUtil.java
-C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\items\PostShulker.java
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\commands\TradeTabCompleter.java
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\items\PullItems.java
-C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\items\ItemSerializer.java
+C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\helpers\ItemSerializer.java
+C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\shulkers\PostShulker.java
 C:\petProject\siteIntegration\src\main\java\org\example\mc\siteintegration\items\PostItems.java

@@ -78,7 +78,7 @@ public class PullMoney implements CommandExecutor {
     }
 
     private void fetchGetMoneyCount() throws Exception {
-        String url = "http://localhost:8080/mc/user/money/" + player.getName();
+        String url = "https://mc-back-end.onrender.com/mc/user/money/" + player.getName();
         HttpGet request = new HttpGet(url);
 
         CompletableFuture.runAsync(() -> {
@@ -170,7 +170,7 @@ public class PullMoney implements CommandExecutor {
     private void fetchPutMoney() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/user/money";
+        String url = "https://mc-back-end.onrender.com/mc/user/money";
         HttpPut request = new HttpPut(url);
 
         JSONObject payload = new JSONObject();
@@ -236,7 +236,7 @@ public class PullMoney implements CommandExecutor {
     }
 
     private void fetchPutMoneyConfirm() throws Exception{
-        String url = "http://localhost:8080/mc/user/money/confirm";
+        String url = "https://mc-back-end.onrender.com/mc/user/money/confirm";
         HttpPut request = new HttpPut(url);
 
         JSONObject payload = new JSONObject();

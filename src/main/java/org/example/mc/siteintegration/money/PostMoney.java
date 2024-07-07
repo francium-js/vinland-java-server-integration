@@ -67,7 +67,7 @@ public class PostMoney implements CommandExecutor {
     private void fetchPostMoney() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "http://localhost:8080/mc/user/money";
+        String url = "https://mc-back-end.onrender.com/mc/user/money";
         HttpPost request = new HttpPost(url);
 
         Bukkit.getLogger().info("" + howMuchPlayerWant);
@@ -130,7 +130,7 @@ public class PostMoney implements CommandExecutor {
 
     private void fetchPostMoneyConfirm() throws Exception{
 
-        String url = "http://localhost:8080/mc/user/money/confirm";
+        String url = "https://mc-back-end.onrender.com/mc/user/money/confirm";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
