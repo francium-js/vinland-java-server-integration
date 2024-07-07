@@ -124,7 +124,7 @@ public class PullItems implements CommandExecutor {
     }
 
     private void fetchDeleteItems() throws Exception  {
-        String url = "https://mc-back-end.onrender.com/mc/user/items/delete/" + itemTicketId;
+        String url = "https://mc-back-end.onrender.com/mc/user/items/delete/" + itemTicketId + '/' + player.getName();
         HttpDelete request = new HttpDelete(url);
 
         CompletableFuture.runAsync(() -> {

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class TradeTabCompleter implements TabCompleter {
 
-    private static final List<String> SUBCOMMANDS = Arrays.asList("валюта(інформація)", "валюта(забрати)", "предмети(забрати)", "валюта(закинути)", "предмети(закинути)","шалкер(закинути)");
+    private static final List<String> SUBCOMMANDS = Arrays.asList("валюта(інформація)", "валюта(забрати)", "предмети(забрати)", "валюта(закинути)", "предмети(закинути)","шалкер(закинути)","шалкер(забрати)");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -29,6 +29,13 @@ public class TradeTabCompleter implements TabCompleter {
         if (args.length == 2 && args[0].equalsIgnoreCase("предмети(забрати)")) {
             List<String> completions = new ArrayList<>();
             completions.add("[id квитка]");
+
+            return StringUtil.copyPartialMatches(args[1], completions, new ArrayList<>());
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("шалкер(забрати)")) {
+            List<String> completions = new ArrayList<>();
+            completions.add("[id шалкера]");
 
             return StringUtil.copyPartialMatches(args[1], completions, new ArrayList<>());
         }

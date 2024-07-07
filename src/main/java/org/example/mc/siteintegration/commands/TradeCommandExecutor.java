@@ -75,6 +75,17 @@ public class TradeCommandExecutor implements CommandExecutor {
             case "шалкер(закинути)":
                 return new PostShulker().onCommand(sender, command, label, newArgs);
             case "шалкер(забрати)":
+                if (newArgs.length == 0) {
+                    sendMessageToActionBar("&cВкажіть id квитка");
+                    return false;
+                }
+
+                try {
+                    Integer.parseInt(newArgs[0]);
+                } catch (NumberFormatException e) {
+                    sendMessageToActionBar("&cНеправильний id квитка");
+                    return false;
+                }
                 return new PullShulker().onCommand(sender, command, label, newArgs);
             default:
                 sendMessageToActionBar("&cНевідома операція: " + subCommand);

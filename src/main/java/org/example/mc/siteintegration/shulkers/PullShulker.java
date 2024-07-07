@@ -30,9 +30,7 @@ import com.google.gson.Gson;
 public class PullShulker implements CommandExecutor {
 
     private Player player;
-    private ItemStack itemInHand;
     private Integer shulkerId;
-    private BlockStateMeta shulkerMeta;
     private PlayerMessageUtil messageUtil;
 
     @Override
@@ -46,7 +44,6 @@ public class PullShulker implements CommandExecutor {
             this.player = (Player) sender;
             this.messageUtil = new PlayerMessageUtil(player);
             this.shulkerId = Integer.parseInt(args[0]);
-            this.itemInHand = player.getInventory().getItemInMainHand();
 
             inspectItemInHand();
             fetchPullShulker();
@@ -62,7 +59,7 @@ public class PullShulker implements CommandExecutor {
         return true;
     }
 
-    private void containNewItemToShulker(JSONArray serializedArray) throws Exception{
+    private void containNewItemToShulker(JSONArray serializedArray,BlockStateMeta shulkerMeta ) throws Exception{
         ItemStack[] itemStackItems = new ItemStack[serializedArray.size()];
 
         for (int i = 0; i < serializedArray.size(); i++) {
@@ -81,14 +78,14 @@ public class PullShulker implements CommandExecutor {
 
                 if (y == serializedArray.size()) break;
             }
-        }
-
+        };
+        
         shulkerBox.getInventory().setContents(contentsArray);
         shulkerMeta.setBlockState(shulkerBox);
     }
 
     private void fetchDeleteItems() throws Exception  {
-        String url = "https://mc-back-end.onrender.com/mc/user/shulker/" + shulkerId + '/' + player.getName();
+        String url = "https://mc-back-end.onrender.com/mc/user/shulkers/" + shulkerId + '/' + player.getName();
         HttpDelete request = new HttpDelete(url);
 
         CompletableFuture.runAsync(() -> {
@@ -119,7 +116,7 @@ public class PullShulker implements CommandExecutor {
     private void fetchPullShulker() throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/shulker";
+        String url = "https://mc-back-end.onrender.com/mc/user/shulkers";
         HttpPut request = new HttpPut(url);
 
         JSONObject payload = new JSONObject();
@@ -152,7 +149,7 @@ public class PullShulker implements CommandExecutor {
 
             inspectItemInHand();
 
-            JSONArray serializedArray = (JSONArray) jsonResponse.get("shulkerItemsData");
+            JSONArray serializedArray = (JSONArray) jsonResponse.get("shulkerItems");
             String shulkerType = jsonResponse.get("shulkerType").toString().toUpperCase();
             String shulkerName = jsonResponse.get("shulkerName").toString();
 
@@ -160,14 +157,17 @@ public class PullShulker implements CommandExecutor {
 
             ItemStack shulkerBoxItem = new ItemStack(material);
 
-            containNewItemToShulker(serializedArray);
+            BlockStateMeta shulkerMeta = (BlockStateMeta) shulkerBoxItem.getItemMeta();
+
+            containNewItemToShulker(serializedArray, shulkerMeta);
 
             shulkerMeta.setDisplayName(shulkerName);
 
             shulkerBoxItem.setItemMeta(shulkerMeta);
+
             player.getInventory().setItemInMainHand(shulkerBoxItem);
             
-            messageUtil.toActionBar("&aВи успішно забрали предмети");
+            messageUtil.toActionBar("&aВи успішно забрали шалкер");
 
             fetchDeleteItems();
         } catch (PlayerError e){
@@ -179,9 +179,11 @@ public class PullShulker implements CommandExecutor {
     }
 
     private void inspectItemInHand() throws Exception{
+        ItemStack itemInHand = player.getInventory().getItemInMainHand();
+
         if (!player.isOnline()) throw new Error("&cГравець вийшов з гри.");
 
-        if (itemInHand != null || itemInHand.getType() != Material.AIR) {
+        if (itemInHand != null && itemInHand.getType() != Material.AIR) {
             throw new PlayerError("&cВ руках нічого не повинно бути");
         }
     }
