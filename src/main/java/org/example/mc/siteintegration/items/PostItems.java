@@ -206,17 +206,7 @@ public class PostItems implements CommandExecutor {
                     JSONArray result = new JSONArray();
 
 
-                    if (item_id.contains("HELMET") ||
-                            item_id.contains("CHESTPLATE")  ||
-                            item_id.contains("LEGGINGS") ||
-                            item_id.contains("BOOTS") ||
-                            item_id.contains("SWORD") ||
-                            item_id.contains("AXE") ||
-                            item_id.contains("PICKAXE") ||
-                            item_id.contains("SHIELD") ||
-                            item_id.contains("TRIDENT") ||
-                            item_id.contains("SHEARS")
-                        ) {
+                    if (!(itemMeta.getEnchants().entrySet().isEmpty())) {
                         for (Map.Entry<Enchantment, Integer> entry : itemMeta.getEnchants().entrySet()) {
                             String key = entry.getKey().toString();
                             Integer value = entry.getValue();
