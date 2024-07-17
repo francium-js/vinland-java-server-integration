@@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.example.mc.siteintegration.constants.UrlConstants;
 import org.example.mc.siteintegration.entities.ShulkerData;
 import org.example.mc.siteintegration.helpers.ItemSerializer;
 import org.example.mc.siteintegration.utils.PlayerError;
@@ -77,7 +78,7 @@ public class PostShulker implements CommandExecutor {
     
     private void fetchPostShulkerConfirm () throws Exception {
 
-        String url = "https://mc-back-end.onrender.com/mc/user/shulkers/confirm";
+        String url = UrlConstants.BACKEND_URL + "mc/user/shulkers/confirm";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
@@ -119,7 +120,7 @@ public class PostShulker implements CommandExecutor {
     private void fetchPostShulker () throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/shulkers";
+        String url = UrlConstants.BACKEND_URL + "mc/user/shulkers";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();

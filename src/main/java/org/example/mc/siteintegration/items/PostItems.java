@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.example.mc.siteintegration.constants.UrlConstants;
 import org.example.mc.siteintegration.helpers.ItemSerializer;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
@@ -74,7 +75,7 @@ public class PostItems implements CommandExecutor {
     
     private void fetchPostItemsConfirm () throws Exception {
 
-        String url = "https://mc-back-end.onrender.com/mc/user/items/confirm";
+        String url = UrlConstants.BACKEND_URL + "mc/user/items/confirm";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();
@@ -116,7 +117,7 @@ public class PostItems implements CommandExecutor {
     private void fetchPostItems () throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/items";
+        String url = UrlConstants.BACKEND_URL + "mc/user/items";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();

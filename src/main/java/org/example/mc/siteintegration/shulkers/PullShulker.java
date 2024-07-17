@@ -18,6 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+import org.example.mc.siteintegration.constants.UrlConstants;
 import org.example.mc.siteintegration.helpers.ItemSerializer;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
@@ -85,7 +86,7 @@ public class PullShulker implements CommandExecutor {
     }
 
     private void fetchDeleteItems() throws Exception  {
-        String url = "https://mc-back-end.onrender.com/mc/user/shulkers/" + shulkerId + '/' + player.getName();
+        String url = UrlConstants.BACKEND_URL + "mc/user/shulkers/" + shulkerId + '/' + player.getName();
         HttpDelete request = new HttpDelete(url);
 
         CompletableFuture.runAsync(() -> {
@@ -116,7 +117,7 @@ public class PullShulker implements CommandExecutor {
     private void fetchPullShulker() throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/shulkers";
+        String url = UrlConstants.BACKEND_URL + "mc/user/shulkers";
         HttpPut request = new HttpPut(url);
 
         JSONObject payload = new JSONObject();

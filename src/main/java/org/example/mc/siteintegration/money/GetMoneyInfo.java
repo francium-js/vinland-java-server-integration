@@ -12,6 +12,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.example.mc.siteintegration.constants.UrlConstants;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
 import org.json.simple.JSONObject;
@@ -51,7 +52,7 @@ public class GetMoneyInfo implements CommandExecutor {
     private void fetchGetMoneyCount() throws Exception {
         messageUtil.toActionBar("&eТриває операція");
 
-            String url = "https://mc-back-end.onrender.com/mc/user/money/" + player.getName();
+            String url = UrlConstants.BACKEND_URL + "mc/user/money/" + player.getName();
             HttpGet request = new HttpGet(url);
 
             CompletableFuture.runAsync(() -> {

@@ -17,6 +17,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+import org.example.mc.siteintegration.constants.UrlConstants;
 import org.example.mc.siteintegration.helpers.ItemSerializer;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
@@ -64,7 +65,7 @@ public class PullItems implements CommandExecutor {
     private void fetchGetItemTicketInfo() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/item_ticket/countSlots?username="+ player.getName() + "&itemTicketId=" + itemTicketId;
+        String url = UrlConstants.BACKEND_URL + "mc/item_ticket/countSlots?username="+ player.getName() + "&itemTicketId=" + itemTicketId;
         HttpGet request = new HttpGet(url);
 
         CompletableFuture.runAsync(() -> {
@@ -124,7 +125,7 @@ public class PullItems implements CommandExecutor {
     }
 
     private void fetchDeleteItems() throws Exception  {
-        String url = "https://mc-back-end.onrender.com/mc/user/items/delete/" + itemTicketId + '/' + player.getName();
+        String url = UrlConstants.BACKEND_URL + "mc/user/items/delete/" + itemTicketId + '/' + player.getName();
         HttpDelete request = new HttpDelete(url);
 
         CompletableFuture.runAsync(() -> {
@@ -155,7 +156,7 @@ public class PullItems implements CommandExecutor {
     private void fetchPullItems() throws Exception  {
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/items/pull/" + itemTicketId;
+        String url = UrlConstants.BACKEND_URL + "mc/user/items/pull/" + itemTicketId;
         HttpPut request = new HttpPut(url);
 
         CompletableFuture.runAsync(() -> {

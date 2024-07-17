@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.example.mc.siteintegration.constants.UrlConstants;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
 import org.json.simple.JSONObject;
@@ -67,7 +68,7 @@ public class PostMoney implements CommandExecutor {
     private void fetchPostMoney() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/money";
+        String url = UrlConstants.BACKEND_URL + "mc/user/money";
         HttpPost request = new HttpPost(url);
 
         Bukkit.getLogger().info("" + howMuchPlayerWant);
@@ -130,7 +131,7 @@ public class PostMoney implements CommandExecutor {
 
     private void fetchPostMoneyConfirm() throws Exception{
 
-        String url = "https://mc-back-end.onrender.com/mc/user/money/confirm";
+        String url = UrlConstants.BACKEND_URL + "mc/user/money/confirm";
         HttpPost request = new HttpPost(url);
 
         JSONObject payload = new JSONObject();

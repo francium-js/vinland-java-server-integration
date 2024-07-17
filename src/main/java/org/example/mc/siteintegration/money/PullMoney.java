@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.example.mc.siteintegration.constants.UrlConstants;
 import org.example.mc.siteintegration.utils.PlayerError;
 import org.example.mc.siteintegration.utils.PlayerMessageUtil;
 import org.json.simple.JSONObject;
@@ -78,7 +79,7 @@ public class PullMoney implements CommandExecutor {
     }
 
     private void fetchGetMoneyCount() throws Exception {
-        String url = "https://mc-back-end.onrender.com/mc/user/money/" + player.getName();
+        String url = UrlConstants.BACKEND_URL + "mc/user/money/" + player.getName();
         HttpGet request = new HttpGet(url);
 
         CompletableFuture.runAsync(() -> {
@@ -170,7 +171,7 @@ public class PullMoney implements CommandExecutor {
     private void fetchPutMoney() throws Exception{
         messageUtil.toActionBar("&eТриває операція");
 
-        String url = "https://mc-back-end.onrender.com/mc/user/money";
+        String url = UrlConstants.BACKEND_URL + "mc/user/money";
         HttpPut request = new HttpPut(url);
 
         JSONObject payload = new JSONObject();
@@ -236,7 +237,7 @@ public class PullMoney implements CommandExecutor {
     }
 
     private void fetchPutMoneyConfirm() throws Exception{
-        String url = "https://mc-back-end.onrender.com/mc/user/money/confirm";
+        String url = UrlConstants.BACKEND_URL + "mc/user/money/confirm";
         HttpPut request = new HttpPut(url);
 
         JSONObject payload = new JSONObject();

@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.example.mc.siteintegration.commands.TradeCommandExecutor;
 import org.example.mc.siteintegration.commands.TradeTabCompleter;
+import org.example.mc.siteintegration.constants.UrlConstants;
 import org.json.simple.JSONObject;
 
 import java.io.FileReader;
@@ -96,7 +97,7 @@ public class SiteIntegration extends JavaPlugin {
     private void fetchPutAdvancements(String username, Object advancements) {
     CompletableFuture.runAsync(() -> {
         HttpClient httpClient = HttpClients.createDefault();
-        String url = "https://mc-back-end.onrender.com/mc/user/advancements";
+        String url = UrlConstants.BACKEND_URL + "mc/user/advancements";
         HttpPut request = new HttpPut(url);
 
         try {
