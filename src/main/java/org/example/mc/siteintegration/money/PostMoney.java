@@ -176,10 +176,10 @@ public class PostMoney implements CommandExecutor {
         }
 
         String shulkerboxName = shulkerMeta.getDisplayName();
-        String skulherboxInHand = "Гаманець " + player.getName();
-        boolean isIdentical = shulkerboxName.equals(skulherboxInHand);
+        boolean isIdenticalWalletName = shulkerboxName.toLowerCase().contains("Гаманець".toLowerCase());
+        boolean isIdenticalPlayerNameInWallet = shulkerboxName.contains(player.getName());
 
-        if (!isIdentical) throw new PlayerError("&cВ руках повинен бути ваш гаманець");
+        if (!isIdenticalWalletName || !isIdenticalPlayerNameInWallet) throw new PlayerError("&cВ руках повинен бути ваш гаманець");
     }
 
     private void inspectShulker() throws Exception {

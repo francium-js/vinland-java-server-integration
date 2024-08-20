@@ -188,6 +188,8 @@ public class PostItems implements CommandExecutor {
                     String item_id = itemSlot.getType().name();
 
                     if (item_id.contains("DEEPSLATE_DIAMOND_ORE")) continue;
+                    if (item_id.contains("BUNDLE")) continue;
+                    if (item_id.contains("OMINOUS_BOTTLE")) continue;
 
                     if (itemMeta instanceof PotionMeta) continue;
 
